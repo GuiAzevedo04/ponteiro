@@ -1,7 +1,7 @@
 // Português (Brasil): o idioma de origem. Os outros arquivos desta pasta têm
 // as mesmas chaves (testes/idiomas.test.mjs confere). Textos com valores são
 // funções, para cada idioma pôr as palavras e o plural no lugar certo.
-import { DURACAO_PT, DIAS } from "../calculo.js";
+import { DURACAO_PT, DIAS, CSV_PT } from "../calculo.js";
 
 const dias = n => `${n} dia${n > 1 ? "s" : ""}`;
 
@@ -16,10 +16,7 @@ export default {
   eixoHoraDoDia: h => `${String(h).padStart(2, "0")}h`,
   dias: DIAS,
   tipos: { trabalho: "Trabalho", folga: "Folga", ferias: "Férias", atestado: "Atestado", feriado: "Feriado/recesso" },
-  csv: {
-    cab: ["data", "dia_semana", "tipo", "chegada", "almoco_inicio", "almoco_horas", "saida", "horas_trabalhadas", "meta_horas"],
-    decimal: ",",
-  },
+  csv: CSV_PT,
   // Nomes de feriados que não estão em feriados.js (lá já tem pt e en)
   feriados: {},
   observado: "observado",
