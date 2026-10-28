@@ -125,31 +125,11 @@ const PADRAO = {
 // fonte da verdade. O navegador mantém uma cópia para abrir na hora e para
 // quando o servidor estiver desligado; cada campo carrega a hora da última
 // edição, e as duas cópias se juntam campo a campo (calculo.js: mesclar).
-let dados = lerLocal(); // { campos, camposAtualizado, registro }; null até a 1ª carga
+let dados = lerJSON("horas.dados"); // { campos, camposAtualizado, registro }; null até a 1ª carga
 let versao = local.ler("horas.versao") ?? '"?"';
 let pendente = local.ler("horas.pendente") === "1";
 let online = null;
 let edicoes = 0;
-
-function lerLocal() {
-  const salvo = lerJSON("horas.dados");
-  if (salvo) return salvo;
-  // Formato da versão anterior: uma chave por campo, mais "registro"
-  const registro = lerJSON("registro");
-  if (!registro) return null;
-  const campos = {};
-  for (const id of ["horasSemana", "salario", "entrada", "almoco", "almocoHoras", "temAlmoco", "temExtra"]) {
-    const v = local.ler(id);
-    if (v !== null) campos[id] = v;
-  }
-  // Mudança feita com o servidor desligado e ainda não enviada: precisa ganhar do arquivo
-  const naoEnviado = local.ler("pendente") === "1";
-  if (naoEnviado) {
-    for (const reg of Object.values(registro)) reg.atualizado = 1;
-    pendente = true;
-  }
-  return { campos, camposAtualizado: naoEnviado ? 1 : 0, registro };
-}
 
 // País e feriados extras. Quem usava o app antes de existir o país nos ajustes
 // tinha o Brasil e o aniversário da cidade (13/10): é o que vale até a
@@ -278,14 +258,16 @@ function apagarDia(k) {
 // ------------------------------------------------------------------ sincronização
 
 async function sincronizar(resposta) {
+  let r = resposta;
+  let remoto = null;
   try {
-    const r = resposta === undefined ? await fetch("/dados", { cache: "no-store" }) : resposta;
-    if (!r?.ok) throw new Error("sem servidor");
-    receber(await r.json(), r.headers.get("ETag"));
-    online = true;
+    if (r === undefined) r = await fetch("/dados", { cache: "no-store" });
+    if (r?.ok) remoto = await r.json();
   } catch {
-    online = false;
+    // sem servidor: fica com a cópia do navegador
   }
+  online = remoto !== null;
+  if (online) receber(remoto, r.headers.get("ETag"));
   mostrarEstado();
 }
 
@@ -305,7 +287,6 @@ function receber(remoto, etag) {
   else if (!enviando) {
     pendente = false;
     local.apagar("horas.pendente");
-    local.apagar("pendente");
   }
 }
 
@@ -324,32 +305,37 @@ async function enviar() {
     // outra aba ou outro navegador gravou antes, o servidor responde 409 com
     // o arquivo atual: junta os dois e tenta de novo.
     for (let tentativa = 0; tentativa < 5; tentativa++) {
-      const r = await fetch("/dados", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", "If-Match": versao },
-        body: JSON.stringify(dados),
-      });
+      let r;
+      let atual = null;
+      try {
+        r = await fetch("/dados", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", "If-Match": versao },
+          body: JSON.stringify(dados),
+        });
+        if (r.status === 409) atual = await r.json();
+      } catch {
+        online = false; // sem servidor: a mudança fica pendente no navegador
+        break;
+      }
       versao = r.headers.get("ETag") ?? versao;
       local.gravar("horas.versao", versao);
-      if (r.status === 409) {
-        dados = mesclar(dados, await r.json()).dados;
+      if (atual) {
+        dados = mesclar(dados, atual).dados;
         local.gravar("horas.dados", JSON.stringify(dados));
         aoMudarDeFora();
         continue;
       }
-      if (!r.ok) throw new Error(r.status);
-      if (edicoes === marca) {
+      online = r.ok;
+      if (r.ok && edicoes === marca) {
         pendente = false;
         local.apagar("horas.pendente");
-        local.apagar("pendente");
       }
-      online = true;
       break;
     }
-  } catch {
-    online = false;
+  } finally {
+    enviando = false;
   }
-  enviando = false;
   mostrarEstado();
   if (enviarDeNovo) {
     enviarDeNovo = false;
@@ -359,16 +345,10 @@ async function enviar() {
 
 function mostrarEstado() {
   const e = $("estado");
-  if (online === false) {
-    poe(e, t().semServidor);
-    e.className = "off";
-  } else if (pendente) {
-    poe(e, t().salvando);
-    e.className = "";
-  } else if (online) {
-    poe(e, t().salvo);
-    e.className = "ok";
-  }
+  e.classList.toggle("off", online === false);
+  if (online === false) poe(e, t().semServidor);
+  else if (pendente) poe(e, t().salvando);
+  else if (online) poe(e, t().salvo);
   e.title = online === false ? t().sobeQuandoVoltar : "horas/registro.json";
 }
 
@@ -779,9 +759,9 @@ function desenharFavicon(p) {
   const volta = 2 * Math.PI * r;
   // O fundo do ícone é sempre escuro: as cores são as do tema escuro
   const daltonismo = cfg().cores === "daltonismo";
-  const cor = passo >= 20 ? (daltonismo ? "#56b4e9" : "#34d399") : (daltonismo ? "#cc79a7" : "#60a5fa");
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b1120"/>`
-    + `<circle cx="16" cy="16" r="${r}" fill="none" stroke="#2b3852" stroke-width="5"/>`
+  const cor = passo >= 20 ? (daltonismo ? "#56b4e9" : "#5cc58f") : (daltonismo ? "#cc79a7" : "#7eb0f5");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#121316"/>`
+    + `<circle cx="16" cy="16" r="${r}" fill="none" stroke="#2c2f36" stroke-width="5"/>`
     + `<circle cx="16" cy="16" r="${r}" fill="none" stroke="${cor}" stroke-width="5" stroke-linecap="round" `
     + `stroke-dasharray="${((passo / 20) * volta).toFixed(1)} ${volta.toFixed(1)}" transform="rotate(-90 16 16)"/></svg>`;
   $("favicon").href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -1139,7 +1119,7 @@ function linhaDia({ k, reg, feriado }, hoje, agora, c) {
   } else if (k === hoje && reg.entrada) {
     trab = `<span class="ate-agora">${H(trabalhadoMs(reg, desdeMeiaNoite(agora)))}</span> <span class="apagado">${esc(t().ateAgora)}</span>`;
   } else trab = `<span class="apagado">${esc(t().semSaida)}</span>`;
-  const valeu = vDia && !futuro ? `<span class="valor">${grana(vDia)}</span>` : '<span class="apagado">—</span>';
+  const valeu = vDia && !futuro ? `<span class="num">${grana(vDia)}</span>` : '<span class="apagado">—</span>';
   // Horários só fazem sentido em dia de trabalho que já chegou
   const bloqueado = futuro || !trabalho;
   const classe = k === hoje ? "hoje" : futuro ? "futuro" : reg ? "" : "vazio";
@@ -1196,7 +1176,7 @@ function renderHistorico() {
   }
   const partes = [
     t().resumoMes(H(tot.trabalhado), H(tot.meta), saldoHtml(tot.saldo)),
-    t().resumoValeram(uteis, `<span class="valor">${grana(uteis * valorDia(mesVisto, c.salario, dados.registro, cal))}</span>`),
+    t().resumoValeram(uteis, `<span class="num">${grana(uteis * valorDia(mesVisto, c.salario, dados.registro, cal))}</span>`),
   ];
   if (ano === agora.getFullYear() && mes === agora.getMonth()) {
     partes.push(t().resumoSemana(saldoHtml(saldo)));
@@ -1407,8 +1387,8 @@ function montarFigura(id, desenho, tabela) {
     tab.hidden = true;
     fig.append(tab);
   }
-  tab.innerHTML = `<table><thead><tr>${tabela.cab.map(c => `<th>${c}</th>`).join("")}</tr></thead>`
-    + `<tbody>${tabela.linhas.map(l => `<tr>${l.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  tab.innerHTML = `<table><thead><tr>${tabela.cab.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead>`
+    + `<tbody>${tabela.linhas.map(l => `<tr>${l.map(c => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
   area.innerHTML = desenho ?? `<p class="vazio">${esc(t().semDiasFechados)}</p>`;
   return area;
 }
@@ -1549,7 +1529,7 @@ function graficoDias(dias, resumo) {
       + `<text class="ref-rot" x="${L - m.r + 8}" y="${y(t)}" dy="0.32em">${esc(rot)} ${hora(t)}</text>`;
   }
   dias.forEach((d, i) => {
-    g += `<rect class="alvo" data-i="${i}" tabindex="0" x="${m.l + banda * i}" y="${m.t}" width="${banda}" height="${h}" aria-label="${tabela.linhas[i].join(", ")}"/>`;
+    g += `<rect class="alvo" data-i="${i}" tabindex="0" x="${m.l + banda * i}" y="${m.t}" width="${banda}" height="${h}" aria-label="${esc(tabela.linhas[i].join(", "))}"/>`;
   });
   const area = montarFigura("gDias", `${svgAbre(L, A, t().grafDiasAria)}${g}</svg>`, tabela);
   ligarDicas(area, i => {
