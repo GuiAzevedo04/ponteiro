@@ -19,109 +19,47 @@
 /* Tema escuro é o padrão; o claro vem por escolha nos ajustes ou pelo
    sistema, no modo automático. Neutros grafite puxados para o quente, um
    acento só (azul, para o que se clica) e cor de dado só com significado:
-   verde e vermelho para o sinal do saldo, âmbar para a hora de sair. */
-:root {
-  color-scheme: dark;
-  --fundo: #121316;
-  --fundo-2: #16181b;
-  --superficie: #1a1c20;
-  --segmento: #16181b;
-  --selecionado: #2e3138;
-  --borda: #2a2d33;
-  --borda-campo: #686d77;
-  --trilho: #2c2f36;
-  --texto: #ecebe7;
-  --texto-2: #a8aab0;
-  --apagado: #8b8e95;
-  --verde: #5cc58f;
-  --ambar: #e9b44c;
-  --azul: #7eb0f5;
-  --vermelho: #f08473;
-  --sobre-azul: #121316;
-  --serie: #5b93e0;
-  --grade: #25282d;
-  --eixo: #686d77;
-  --almoco: #7a7f88;
-  --sombra-1: none;
-  --sombra-2: 0 12px 32px rgb(0 0 0 / 0.4);
-}
-:root[data-tema="claro"] {
-  color-scheme: light;
-  --fundo: #f4f3f0;
-  --fundo-2: #f8f7f5;
-  --superficie: #ffffff;
-  --segmento: #e9e7e2;
-  --selecionado: #ffffff;
-  --borda: #dddbd6;
-  --borda-campo: #82858c;
-  --trilho: #e2e0db;
-  --texto: #1b1c1f;
-  --texto-2: #55585f;
-  --apagado: #6a6d74;
-  --verde: #1b7a48;
-  --ambar: #8a5a00;
-  --azul: #1f5fc4;
-  --vermelho: #b3261e;
-  --sobre-azul: #ffffff;
-  --serie: #2f6bd0;
-  --grade: #e6e4df;
-  --eixo: #82858c;
-  --almoco: #9a9da3;
-  --sombra-1: 0 1px 2px rgb(27 28 31 / 0.06), 0 2px 8px rgb(27 28 31 / 0.04);
-  --sombra-2: 0 12px 32px rgb(27 28 31 / 0.16);
-}
+   verde e vermelho para o sinal do saldo, âmbar para a hora de sair.
+   Cada cor é light-dark(claro, escuro): o color-scheme escolhe qual vale. */
+:root { color-scheme: dark; }
+:root[data-tema="claro"] { color-scheme: light; }
 @media (prefers-color-scheme: light) {
-  :root[data-tema="auto"] {
-    color-scheme: light;
-    --fundo: #f4f3f0;
-    --fundo-2: #f8f7f5;
-    --superficie: #ffffff;
-    --segmento: #e9e7e2;
-    --selecionado: #ffffff;
-    --borda: #dddbd6;
-    --borda-campo: #82858c;
-    --trilho: #e2e0db;
-    --texto: #1b1c1f;
-    --texto-2: #55585f;
-    --apagado: #6a6d74;
-    --verde: #1b7a48;
-    --ambar: #8a5a00;
-    --azul: #1f5fc4;
-    --vermelho: #b3261e;
-    --sobre-azul: #ffffff;
-    --serie: #2f6bd0;
-    --grade: #e6e4df;
-    --eixo: #82858c;
-    --almoco: #9a9da3;
-    --sombra-1: 0 1px 2px rgb(27 28 31 / 0.06), 0 2px 8px rgb(27 28 31 / 0.04);
-    --sombra-2: 0 12px 32px rgb(27 28 31 / 0.16);
-  }
+  :root[data-tema="auto"] { color-scheme: light; }
+}
+:root {
+  --fundo: light-dark(#f4f3f0, #121316);
+  --fundo-2: light-dark(#f8f7f5, #16181b);
+  --superficie: light-dark(#ffffff, #1a1c20);
+  --segmento: light-dark(#e9e7e2, #16181b);
+  --selecionado: light-dark(#ffffff, #2e3138);
+  --borda: light-dark(#dddbd6, #2a2d33);
+  --borda-campo: light-dark(#82858c, #686d77);
+  --trilho: light-dark(#e2e0db, #2c2f36);
+  --texto: light-dark(#1b1c1f, #ecebe7);
+  --texto-2: light-dark(#55585f, #a8aab0);
+  --apagado: light-dark(#6a6d74, #8b8e95);
+  --verde: light-dark(#1b7a48, #5cc58f);
+  --ambar: light-dark(#8a5a00, #e9b44c);
+  --azul: light-dark(#1f5fc4, #7eb0f5);
+  --vermelho: light-dark(#b3261e, #f08473);
+  --sobre-azul: light-dark(#ffffff, #121316);
+  --serie: light-dark(#2f6bd0, #5b93e0);
+  --grade: light-dark(#e6e4df, #25282d);
+  --eixo: light-dark(#82858c, #686d77);
+  --almoco: light-dark(#9a9da3, #7a7f88);
+  /* No escuro, sem sombra: a borda já separa os cartões */
+  --sombra-1: 0 1px 2px light-dark(rgb(27 28 31 / 0.06), transparent), 0 2px 8px light-dark(rgb(27 28 31 / 0.04), transparent);
+  --sombra-2: 0 12px 32px light-dark(rgb(27 28 31 / 0.16), rgb(0 0 0 / 0.4));
 }
 
 /* Modo daltonismo (Okabe–Ito): saldo positivo azul e negativo laranja no
    lugar de verde e vermelho, que somem juntos na deuteranopia. Escolhidas
    para contraste AA, também com o filtro de luz azul. */
 :root[data-cores="daltonismo"] {
-  --verde: #56b4e9;
-  --vermelho: #e69f00;
-  --ambar: #f0e442;
-  --azul: #cc79a7;
-}
-:root[data-cores="daltonismo"][data-tema="claro"] {
-  --verde: #0072b2;
-  --vermelho: #a84b00;
-  --ambar: #6a3d9a;
-  --azul: #00695c;
-  --sobre-azul: #ffffff;
-}
-@media (prefers-color-scheme: light) {
-  :root[data-cores="daltonismo"][data-tema="auto"] {
-    --verde: #0072b2;
-    --vermelho: #a84b00;
-    --ambar: #6a3d9a;
-    --azul: #00695c;
-    --sobre-azul: #ffffff;
-  }
+  --verde: light-dark(#0072b2, #56b4e9);
+  --vermelho: light-dark(#a84b00, #e69f00);
+  --ambar: light-dark(#6a3d9a, #f0e442);
+  --azul: light-dark(#00695c, #cc79a7);
 }
 
 /* Escala: texto 13/15/18/24/32/48 (e o relógio), pesos 400 e 600, espaços de
