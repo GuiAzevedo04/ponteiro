@@ -32,7 +32,7 @@ export default {
     semServidor: "No server: saving only in this browser",
     salvando: "Saving…",
     salvo: "Saved",
-    sobeQuandoVoltar: "Uploads to horas/registro.json when the server is back",
+    sobeQuandoVoltar: "Uploads to horas/dados/registro.json when the server is back",
 
     tempoHoje: "Time worked today",
     dinheiroHoje: "Earned today",
@@ -210,7 +210,7 @@ export default {
     diaDeTrabalho: "Working day",
     tirar: "Remove",
     backups: "Backups",
-    backupsNota: "Everything is kept in horas/registro.json. Before the first save of each day, the server keeps a copy in horas/backups/ (for the last year).",
+    backupsNota: "Everything is kept in horas/dados/registro.json. Before the first save of each day, the server keeps a copy in horas/dados/backups/ (for the last year).",
     voltarAo: "Go back to the start of",
     escolhaDia: "pick a day",
     restaurar: "Restore",

@@ -117,7 +117,7 @@ const PADRAO = {
   temAlmoco: "true", temExtra: "false", nome: "", alertas: "false", tema: "escuro", cores: "padrao", ocultar: "true",
 };
 
-// Persistência: o servidor.py guarda tudo em horas/registro.json, que é a
+// Persistência: o servidor.py guarda tudo em horas/dados/registro.json, que é a
 // fonte da verdade. O navegador mantém uma cópia para abrir na hora e para
 // quando o servidor estiver desligado; cada campo carrega a hora da última
 // edição, e as duas cópias se juntam campo a campo (calculo.js: mesclar).
@@ -333,7 +333,7 @@ function mostrarEstado() {
   if (online === false) poe(e, t().semServidor);
   else if (pendente) poe(e, t().salvando);
   else if (online) poe(e, t().salvo);
-  e.title = online === false ? t().sobeQuandoVoltar : "horas/registro.json";
+  e.title = online === false ? t().sobeQuandoVoltar : "horas/dados/registro.json";
 }
 
 // Outra aba deste navegador gravou: junta na hora, sem esperar o servidor

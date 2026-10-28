@@ -32,7 +32,7 @@ export default {
     semServidor: "Sem servidor: salvando só neste navegador",
     salvando: "Salvando…",
     salvo: "Salvo",
-    sobeQuandoVoltar: "Sobe para horas/registro.json quando o servidor voltar",
+    sobeQuandoVoltar: "Sobe para horas/dados/registro.json quando o servidor voltar",
 
     // hoje
     tempoHoje: "Tempo trabalhado hoje",
@@ -216,7 +216,7 @@ export default {
     diaDeTrabalho: "Dia de trabalho",
     tirar: "Tirar",
     backups: "Backups",
-    backupsNota: "Tudo fica em horas/registro.json. Antes da primeira gravação de cada dia, o servidor guarda uma cópia em horas/backups/ (do último ano).",
+    backupsNota: "Tudo fica em horas/dados/registro.json. Antes da primeira gravação de cada dia, o servidor guarda uma cópia em horas/dados/backups/ (do último ano).",
     voltarAo: "Voltar ao começo de",
     escolhaDia: "escolha o dia",
     restaurar: "Restaurar",
