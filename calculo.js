@@ -8,6 +8,8 @@ export const HORA = 3600000;
 export const MINUTO = 60000;
 
 export const pad = n => String(n).padStart(2, "0");
+// Texto que entra em HTML montado com innerHTML
+export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 export const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 export const chaveDia = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 export const deChave = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };

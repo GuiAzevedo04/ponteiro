@@ -361,7 +361,7 @@ test("histórico, semanas e estatísticas dão o mesmo saldo", () => {
 // ------------------------------------------------------------------ sintaxe
 
 // O app.js só roda no navegador, mas um erro de sintaxe dá para pegar aqui
-for (const arquivo of ["app.js", "sw.js"]) {
+for (const arquivo of ["app.js", "graficos.js", "sw.js"]) {
   test(`${arquivo} não tem erro de sintaxe`, () => {
     const caminho = fileURLToPath(new URL(`../${arquivo}`, import.meta.url));
     const r = spawnSync(process.execPath, ["--check", caminho], { encoding: "utf8" });

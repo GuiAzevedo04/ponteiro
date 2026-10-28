@@ -3,7 +3,7 @@
 // primeiro, então uma versão nova do app aparece no próximo F5.
 const CACHE = "horas-v6";
 // O idioma em uso entra no cache quando é carregado, como qualquer outro arquivo
-const ARQUIVOS = ["/", "/estilo.css", "/app.js", "/inicio.js", "/calculo.js", "/feriados.js", "/idiomas/pt.js",
+const ARQUIVOS = ["/", "/estilo.css", "/app.js", "/inicio.js", "/calculo.js", "/graficos.js", "/feriados.js", "/idiomas/pt.js",
   "/icone.svg", "/manifest.webmanifest", "/fontes/plex-sans-latin-400.woff2", "/fontes/plex-sans-latin-600.woff2"];
 
 self.addEventListener("install", e => {

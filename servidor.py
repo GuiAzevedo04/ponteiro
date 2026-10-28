@@ -46,6 +46,7 @@ ESTATICOS = {
     "/estilo.css": "estilo.css",
     "/app.js": "app.js",
     "/calculo.js": "calculo.js",
+    "/graficos.js": "graficos.js",
     "/feriados.js": "feriados.js",
     "/sw.js": "sw.js",
     "/inicio.js": "inicio.js",
