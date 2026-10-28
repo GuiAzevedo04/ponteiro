@@ -1,6 +1,3 @@
-registro.json
-cambio.json
-backups/
-*.tmp
+dados/
 __pycache__/
 bench/

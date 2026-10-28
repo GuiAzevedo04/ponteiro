@@ -1,8 +1,8 @@
 # Horas
 
 Controle de horas trabalhadas, saldo da semana e bolsa do mês. É uma página
-servida por um servidor pequeno em Python, que guarda tudo em `registro.json`
-nesta pasta. Nada sai do computador.
+servida por um servidor pequeno em Python, que guarda tudo em
+`dados/registro.json`. Nada sai do computador.
 
 ## Requisitos
 
@@ -28,6 +28,8 @@ Depois é só abrir http://localhost:8765. Para usar outra porta, defina
 - `servidor.py`: o servidor; fica fora de `pagina/` e nunca é entregue.
 - `testes/`: testes da página e do servidor.
 - `autostart/`: arquivos para iniciar o servidor junto com o sistema.
+- `dados/`: seus dados, a cotação do dia e os backups. Fica fora do git e
+  nunca é entregue pela rede.
 
 ## Onde mudar o quê
 
@@ -39,7 +41,7 @@ Depois é só abrir http://localhost:8765. Para usar outra porta, defina
 | Contas: saldo, bolsa, hora de sair | `pagina/calculo.js`, com testes em `testes/` |
 | Telas e botões | `pagina/index.html` (o que aparece) e `pagina/app.js` (o que faz) |
 | Gráficos das estatísticas | `pagina/graficos.js` |
-| Seus dados | `registro.json`; prefira mudar pela página |
+| Seus dados | `dados/registro.json`; prefira mudar pela página |
 
 O servidor só entrega os arquivos da lista `ESTATICOS` em `servidor.py`, e a
 página só abre sem servidor com os da lista `ARQUIVOS` em `pagina/sw.js`: um
@@ -80,13 +82,13 @@ Tudo isso fica em Ajustes.
   moeda em que se recebe. Com "Mostrar em" diferente, todos os valores
   aparecem convertidos pela cotação do dia. Quem busca a cotação é o
   servidor, uma vez por dia, em `open.er-api.com` (grátis, sem conta), e
-  guarda em `cambio.json`. É a única ida do app à internet e não leva nada
+  guarda em `dados/cambio.json`. É a única ida do app à internet e não leva nada
   dos seus dados. Sem internet, vale a última cotação; sem cotação nenhuma,
   os valores ficam na moeda da bolsa. Meses passados também usam a cotação
   de hoje.
 - **Idioma:** português ou inglês. Na primeira visita vale o do navegador.
   Datas, horários e dinheiro seguem o idioma (5:00 PM em inglês, 17:00 em
-  português); o que fica guardado em `registro.json` não muda.
+  português); o que fica guardado em `dados/registro.json` não muda.
 - **Duração do almoço:** dá para digitar `1h30`, `1:30`, `1,5`, `1.5 hours`
   ou `35 min`, nos dois idiomas.
 - **CSV:** em português, separado por `;` com vírgula decimal; em inglês, por
@@ -104,11 +106,11 @@ andamento nos gráficos tem contorno tracejado.
 
 ## Dados e backups
 
-- **Fonte da verdade:** `registro.json`. O navegador guarda uma cópia, para a
+- **Fonte da verdade:** `dados/registro.json`. O navegador guarda uma cópia, para a
   página abrir mesmo com o servidor desligado. O que mudar nesse meio-tempo
   sobe quando o servidor voltar.
 - **Backup diário:** antes da primeira gravação de cada dia, o servidor copia
-  o arquivo para `backups/` e guarda as cópias do último ano.
+  o arquivo para `dados/backups/` e guarda as cópias do último ano.
 - **Restaurar:** em Ajustes, escolha o dia em "Voltar ao começo de".
 - **Segurança:** o servidor só atende o próprio computador (127.0.0.1) e só a
   própria página. Outros sites não leem nem gravam os dados.

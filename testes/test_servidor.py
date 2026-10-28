@@ -36,7 +36,8 @@ class ServidorTest(unittest.TestCase):
                      "pagina/fontes/plex-sans-latin-400.woff2"):
             (self.pasta / nome).parent.mkdir(parents=True, exist_ok=True)
             (self.pasta / nome).write_text(f"conteúdo de {nome}", encoding="utf-8")
-        (self.pasta / "registro.json").write_text(json.dumps(INICIAL), encoding="utf-8")
+        (self.pasta / "dados").mkdir()
+        (self.pasta / "dados" / "registro.json").write_text(json.dumps(INICIAL), encoding="utf-8")
         self.srv = servidor.Servidor(self.pasta, 0)
         self.porta = self.srv.server_address[1]
         threading.Thread(target=self.srv.serve_forever, daemon=True).start()
@@ -61,7 +62,7 @@ class ServidorTest(unittest.TestCase):
             con.close()
 
     def no_disco(self):
-        return json.loads((self.pasta / "registro.json").read_text(encoding="utf-8"))
+        return json.loads((self.pasta / "dados" / "registro.json").read_text(encoding="utf-8"))
 
     def novo_dia(self, dados, dia):
         dados = json.loads(json.dumps(dados))
@@ -254,14 +255,14 @@ class ServidorTest(unittest.TestCase):
     # ------------------------------------------------------------ backups
 
     def test_backup_guarda_o_estado_de_antes_do_dia(self):
-        hoje = self.pasta / "backups" / f"registro-{date.today().isoformat()}.json"
+        hoje = self.pasta / "dados" / "backups" / f"registro-{date.today().isoformat()}.json"
         self.pedir("PUT", "/dados", self.novo_dia(INICIAL, "2026-10-07"), If_Match='"3"')
         self.assertEqual(json.loads(hoje.read_text(encoding="utf-8")), INICIAL)
         self.pedir("PUT", "/dados", self.novo_dia(self.no_disco(), "2026-10-08"), If_Match='"4"')
         self.assertEqual(json.loads(hoje.read_text(encoding="utf-8")), INICIAL)
 
     def test_backup_mantem_o_ultimo_ano(self):
-        pasta = self.pasta / "backups"
+        pasta = self.pasta / "dados" / "backups"
         pasta.mkdir()
         hoje = date.today()
         for atras in (400, 366, 365, 100, 1):
@@ -277,7 +278,7 @@ class ServidorTest(unittest.TestCase):
     def test_lista_os_backups_do_mais_novo_ao_mais_velho(self):
         status, corpo, _ = self.pedir("GET", "/dados/backups")
         self.assertEqual((status, json.loads(corpo)), (200, []))
-        pasta = self.pasta / "backups"
+        pasta = self.pasta / "dados" / "backups"
         pasta.mkdir()
         for dia in ("2026-10-20", "2026-10-22", "2026-10-21"):
             (pasta / f"registro-{dia}.json").write_text(json.dumps({"registro": {dia: {}}}), encoding="utf-8")
@@ -287,7 +288,7 @@ class ServidorTest(unittest.TestCase):
         self.assertEqual(cab["Cache-Control"], "no-store")
 
     def test_le_um_backup_pela_data(self):
-        pasta = self.pasta / "backups"
+        pasta = self.pasta / "dados" / "backups"
         pasta.mkdir()
         (pasta / "registro-2026-10-21.json").write_text(json.dumps(INICIAL), encoding="utf-8")
         status, corpo, _ = self.pedir("GET", "/dados/backups/2026-10-21")
@@ -312,18 +313,18 @@ class ServidorTest(unittest.TestCase):
         esperado = {"data": "2026-10-22", "proxima": 1792715501, "base": "USD",
                     "taxas": {"USD": 1, "BRL": 5.0246, "EUR": 0.8903}}
         self.assertEqual((status, json.loads(corpo)), (200, esperado))
-        self.assertEqual(json.loads((self.pasta / "cambio.json").read_text(encoding="utf-8")), esperado)
+        self.assertEqual(json.loads((self.pasta / "dados" / "cambio.json").read_text(encoding="utf-8")), esperado)
 
     def test_cambio_do_dia_nao_busca_de_novo(self):
         guardado = {"data": "2026-10-22", "proxima": 4102444800, "base": "USD", "taxas": {"USD": 1, "BRL": 5}}
-        (self.pasta / "cambio.json").write_text(json.dumps(guardado), encoding="utf-8")
+        (self.pasta / "dados" / "cambio.json").write_text(json.dumps(guardado), encoding="utf-8")
         status, corpo, _ = self.pedir("GET", "/dados/cambio")
         self.assertEqual((status, json.loads(corpo)), (200, guardado))
         self.urlopen.assert_not_called()
 
     def test_cambio_sem_internet_usa_o_ultimo(self):
         velho = {"data": "2026-10-01", "proxima": 0, "base": "USD", "taxas": {"USD": 1, "BRL": 5.4}}
-        (self.pasta / "cambio.json").write_text(json.dumps(velho), encoding="utf-8")
+        (self.pasta / "dados" / "cambio.json").write_text(json.dumps(velho), encoding="utf-8")
         status, corpo, _ = self.pedir("GET", "/dados/cambio")
         self.assertEqual((status, json.loads(corpo)), (200, velho))
         # E não insiste a cada pedido enquanto a rede não volta
@@ -346,7 +347,7 @@ class ServidorTest(unittest.TestCase):
         self.assertEqual(self.pedir("GET", "/dados/cambio", Origin="https://evil.example")[0], 403)
 
     def test_sem_arquivo_comeca_vazio(self):
-        (self.pasta / "registro.json").unlink()
+        (self.pasta / "dados" / "registro.json").unlink()
         _, corpo, cab = self.pedir("GET", "/dados")
         self.assertEqual(json.loads(corpo), {"versao": 0, "campos": {}, "registro": {}})
         self.assertEqual(cab["ETag"], '"0"')

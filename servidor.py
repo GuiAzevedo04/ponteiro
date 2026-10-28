@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Serve a página de horas em http://localhost:8765 e guarda os dados em registro.json.
+"""Serve a página de horas em http://localhost:8765 e guarda os dados em dados/registro.json.
 
 Só usa a biblioteca padrão (Python 3.8 ou mais novo) e roda em Linux, macOS,
 FreeBSD e Windows. Rodar com: python3 servidor.py (no Windows: py servidor.py)
@@ -112,15 +112,17 @@ class Servidor(ThreadingHTTPServer):
     def __init__(self, pasta=PASTA, porta=PORTA):
         super().__init__(("127.0.0.1", porta), Handler)
         self.pasta = Path(pasta)
-        self.arquivo = self.pasta / "registro.json"
-        self.backups = self.pasta / "backups"
+        self.dados = self.pasta / "dados"
+        self.dados.mkdir(exist_ok=True)
+        self.arquivo = self.dados / "registro.json"
+        self.backups = self.dados / "backups"
         porta = self.server_address[1]
         self.hosts = {f"localhost:{porta}", f"127.0.0.1:{porta}"}
         self.origens = {f"http://{h}" for h in self.hosts}
         # Ler, comparar a versão e gravar precisa ser uma coisa só
         self.trava = threading.Lock()
         self._cache = (None, b"", 0)
-        self.arquivo_cambio = self.pasta / "cambio.json"
+        self.arquivo_cambio = self.dados / "cambio.json"
         self.trava_cambio = threading.Lock()
         self._tentou_cambio = 0.0
 
@@ -155,7 +157,7 @@ class Servidor(ThreadingHTTPServer):
                 self._tentou_cambio = time.time()
                 novo = buscar_cambio()
                 if novo:
-                    fd, tmp = tempfile.mkstemp(dir=self.pasta, prefix=".cambio-", suffix=".tmp")
+                    fd, tmp = tempfile.mkstemp(dir=self.dados, prefix=".cambio-", suffix=".tmp")
                     try:
                         with os.fdopen(fd, "w", encoding="utf-8") as f:
                             json.dump(novo, f)
@@ -169,7 +171,7 @@ class Servidor(ThreadingHTTPServer):
         self.guardar_backup_do_dia()
         # Temporário com nome único (dois PUTs ao mesmo tempo não dividem o
         # arquivo) e fsync antes da troca: desligar no meio não corrompe nada
-        fd, tmp = tempfile.mkstemp(dir=self.pasta, prefix=".registro-", suffix=".tmp")
+        fd, tmp = tempfile.mkstemp(dir=self.dados, prefix=".registro-", suffix=".tmp")
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as f:
                 json.dump(dados, f, ensure_ascii=False, indent=2)
@@ -182,7 +184,7 @@ class Servidor(ThreadingHTTPServer):
         # Garante a troca no disco. O Windows não abre pasta assim (e o NTFS já
         # registra a troca no próprio journal)
         if os.name != "nt":
-            pasta = os.open(self.pasta, os.O_RDONLY)
+            pasta = os.open(self.dados, os.O_RDONLY)
             try:
                 os.fsync(pasta)
             finally:
