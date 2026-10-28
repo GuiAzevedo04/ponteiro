@@ -32,7 +32,7 @@ class ServidorTest(unittest.TestCase):
         self.urlopen = self.internet.start()
         self.addCleanup(self.internet.stop)
         self.pasta = Path(tempfile.mkdtemp())
-        for nome in ("index.html", "app.js", "feriados.js", "servidor.py", "fontes/plex-sans-latin-400.woff2"):
+        for nome in ("index.html", "estilo.css", "app.js", "feriados.js", "servidor.py", "fontes/plex-sans-latin-400.woff2"):
             (self.pasta / nome).parent.mkdir(exist_ok=True)
             (self.pasta / nome).write_text(f"conteúdo de {nome}", encoding="utf-8")
         (self.pasta / "registro.json").write_text(json.dumps(INICIAL), encoding="utf-8")
@@ -211,6 +211,8 @@ class ServidorTest(unittest.TestCase):
             self.assertEqual(cab["Content-Type"], "text/javascript; charset=utf-8")
             _, _, cab = self.pedir("GET", "/")
             self.assertEqual(cab["Content-Type"], "text/html; charset=utf-8")
+            _, _, cab = self.pedir("GET", "/estilo.css")
+            self.assertEqual(cab["Content-Type"], "text/css; charset=utf-8")
 
     def test_grava_no_windows(self):
         """Sem fsync de pasta (o Windows não abre pasta) e com o arquivo preso por um instante."""

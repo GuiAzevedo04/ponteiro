@@ -1,0 +1,607 @@
+/* IBM Plex Sans (OFL, fontes/OFL.txt): algarismos tabulares de verdade e
+   cara de instrumento, que combina com um relógio de ponto. Só o latim, que
+   é o que o português e o inglês usam. */
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fontes/plex-sans-latin-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fontes/plex-sans-latin-600.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Tema escuro é o padrão; o claro vem por escolha nos ajustes ou pelo
+   sistema, no modo automático. Neutros grafite puxados para o quente, um
+   acento só (azul, para o que se clica) e cor de dado só com significado:
+   verde e vermelho para o sinal do saldo, âmbar para a hora de sair. */
+:root {
+  color-scheme: dark;
+  --fundo: #121316;
+  --fundo-2: #16181b;
+  --superficie: #1a1c20;
+  --segmento: #16181b;
+  --selecionado: #2e3138;
+  --borda: #2a2d33;
+  --borda-campo: #686d77;
+  --trilho: #2c2f36;
+  --texto: #ecebe7;
+  --texto-2: #a8aab0;
+  --apagado: #8b8e95;
+  --verde: #5cc58f;
+  --ambar: #e9b44c;
+  --azul: #7eb0f5;
+  --vermelho: #f08473;
+  --sobre-azul: #121316;
+  --serie: #5b93e0;
+  --grade: #25282d;
+  --eixo: #686d77;
+  --almoco: #7a7f88;
+  --sombra-1: none;
+  --sombra-2: 0 12px 32px rgb(0 0 0 / 0.4);
+}
+:root[data-tema="claro"] {
+  color-scheme: light;
+  --fundo: #f4f3f0;
+  --fundo-2: #f8f7f5;
+  --superficie: #ffffff;
+  --segmento: #e9e7e2;
+  --selecionado: #ffffff;
+  --borda: #dddbd6;
+  --borda-campo: #82858c;
+  --trilho: #e2e0db;
+  --texto: #1b1c1f;
+  --texto-2: #55585f;
+  --apagado: #6a6d74;
+  --verde: #1b7a48;
+  --ambar: #8a5a00;
+  --azul: #1f5fc4;
+  --vermelho: #b3261e;
+  --sobre-azul: #ffffff;
+  --serie: #2f6bd0;
+  --grade: #e6e4df;
+  --eixo: #82858c;
+  --almoco: #9a9da3;
+  --sombra-1: 0 1px 2px rgb(27 28 31 / 0.06), 0 2px 8px rgb(27 28 31 / 0.04);
+  --sombra-2: 0 12px 32px rgb(27 28 31 / 0.16);
+}
+@media (prefers-color-scheme: light) {
+  :root[data-tema="auto"] {
+    color-scheme: light;
+    --fundo: #f4f3f0;
+    --fundo-2: #f8f7f5;
+    --superficie: #ffffff;
+    --segmento: #e9e7e2;
+    --selecionado: #ffffff;
+    --borda: #dddbd6;
+    --borda-campo: #82858c;
+    --trilho: #e2e0db;
+    --texto: #1b1c1f;
+    --texto-2: #55585f;
+    --apagado: #6a6d74;
+    --verde: #1b7a48;
+    --ambar: #8a5a00;
+    --azul: #1f5fc4;
+    --vermelho: #b3261e;
+    --sobre-azul: #ffffff;
+    --serie: #2f6bd0;
+    --grade: #e6e4df;
+    --eixo: #82858c;
+    --almoco: #9a9da3;
+    --sombra-1: 0 1px 2px rgb(27 28 31 / 0.06), 0 2px 8px rgb(27 28 31 / 0.04);
+    --sombra-2: 0 12px 32px rgb(27 28 31 / 0.16);
+  }
+}
+
+/* Modo daltonismo (Okabe–Ito): saldo positivo azul e negativo laranja no
+   lugar de verde e vermelho, que somem juntos na deuteranopia. Escolhidas
+   para contraste AA, também com o filtro de luz azul. */
+:root[data-cores="daltonismo"] {
+  --verde: #56b4e9;
+  --vermelho: #e69f00;
+  --ambar: #f0e442;
+  --azul: #cc79a7;
+}
+:root[data-cores="daltonismo"][data-tema="claro"] {
+  --verde: #0072b2;
+  --vermelho: #a84b00;
+  --ambar: #6a3d9a;
+  --azul: #00695c;
+  --sobre-azul: #ffffff;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-cores="daltonismo"][data-tema="auto"] {
+    --verde: #0072b2;
+    --vermelho: #a84b00;
+    --ambar: #6a3d9a;
+    --azul: #00695c;
+    --sobre-azul: #ffffff;
+  }
+}
+
+/* Escala: texto 13/15/18/24/32/48 (e o relógio), pesos 400 e 600, espaços de
+   4 em 4, raios 6 (miúdos), 10 (controles) e 14 (cartões) */
+* { box-sizing: border-box; }
+/* Até o app pôr os textos no idioma escolhido (inicio.js liga). Se o app
+   não carregar, a página aparece assim mesmo depois de um segundo e meio. */
+.traduzindo body { visibility: hidden; animation: aparecer 0s 1.5s forwards; }
+@keyframes aparecer { to { visibility: visible; } }
+[hidden] { display: none !important; }
+html { background: var(--fundo); }
+body {
+  margin: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  font: 15px/1.5 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--fundo);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, p { margin: 0; }
+.rotulo { color: var(--texto-2); font-size: 15px; font-weight: 600; }
+.num { font-variant-numeric: tabular-nums; }
+.apagado { color: var(--apagado); }
+.pos { color: var(--verde); }
+.neg { color: var(--vermelho); }
+:focus-visible { outline: 2px solid var(--azul); outline-offset: 2px; }
+.ic { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.card {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  padding: 24px 32px;
+  box-shadow: var(--sombra-1);
+  /* O relógio muda o texto todo segundo: o layout fica preso no cartão */
+  contain: layout style;
+}
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--texto);
+  border: 1px solid var(--borda-campo);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+}
+.botao:hover:not(:disabled) { border-color: var(--azul); }
+.botao:active:not(:disabled) { background: var(--fundo-2); }
+.botao:disabled { opacity: 0.4; cursor: default; }
+.botao.primario { background: var(--azul); border-color: var(--azul); color: var(--sobre-azul); font-weight: 600; }
+.botao.primario:hover { filter: brightness(1.08); }
+.botao.primario:active:not(:disabled) { background: var(--azul); filter: brightness(0.94); }
+/* Ação de canto (ver tabela): só texto, para não brigar com o gráfico */
+.botao.terciario { border-color: transparent; color: var(--texto-2); padding-inline: 8px; white-space: nowrap; }
+.botao.terciario:hover:not(:disabled) { border-color: transparent; color: var(--texto); text-decoration: underline; text-underline-offset: 3px; }
+.botao.icone { width: 40px; height: 40px; padding: 0; }
+.botao.pequeno { padding: 4px 12px; font-size: 13px; gap: 6px; }
+.botao.pequeno .ic { width: 16px; height: 16px; }
+.botao[aria-pressed="true"] { border-color: var(--azul); color: var(--azul); }
+#btnOcultar[aria-pressed] { border-color: var(--borda-campo); color: var(--texto-2); }
+#btnOcultar[aria-pressed="true"] .olho-aberto, #btnOcultar[aria-pressed="false"] .olho-fechado { display: none; }
+
+input[type=number], input[type=time], input[type=date], input[type=text], select {
+  background: var(--fundo-2);
+  color: var(--texto);
+  border: 1px solid var(--borda-campo);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+input[type=number], #almocoHoras { width: 84px; }
+/* Tracejado e mais grosso: o erro se vê sem depender da cor */
+input[aria-invalid="true"] { border-color: var(--vermelho); border-style: dashed; border-width: 2px; }
+/* Seta própria: a do sistema muda de tamanho e estilo entre navegadores */
+select {
+  appearance: none;
+  padding-inline-end: 32px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--texto-2) 50%), linear-gradient(135deg, var(--texto-2) 50%, transparent 50%);
+  background-position: right 17px center, right 12px center;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+input:disabled, select:disabled { opacity: 0.45; }
+input[type=checkbox] { accent-color: var(--azul); width: 18px; height: 18px; margin: 0; }
+label { display: inline-flex; align-items: center; gap: 8px; color: var(--texto-2); font-size: 15px; }
+
+/* Seletor de telas e de período: o mesmo controle segmentado */
+nav, .segmentos {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--segmento);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+}
+nav button, .segmentos button {
+  background: none;
+  border: 0;
+  color: var(--texto-2);
+  padding: 6px 16px;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 15px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+nav button:hover, .segmentos button:hover { color: var(--texto); background: color-mix(in srgb, var(--selecionado) 50%, transparent); }
+nav button[aria-current="page"], .segmentos button[aria-pressed="true"] { background: var(--selecionado); color: var(--texto); box-shadow: var(--sombra-1); }
+
+/* ------------------------------------------------------------ topo */
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+  padding: 16px 32px;
+}
+.marca { display: flex; align-items: baseline; gap: 12px; margin-inline-end: auto; }
+.marca h1 { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; align-self: center; }
+.marca h1 img { width: 24px; height: 24px; }
+#hojeData { color: var(--texto-2); font-size: 15px; }
+.direita { display: flex; align-items: center; gap: 12px; }
+#estado { font-size: 13px; color: var(--apagado); display: inline-flex; align-items: center; gap: 8px; }
+/* O ponto só aparece quando há o que avisar (sem conexão) */
+#estado.off { color: var(--ambar); }
+#estado.off::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+main { flex: 1; min-height: 0; padding: 0 32px 32px; display: flex; flex-direction: column; }
+.tela { flex: 1; min-height: 0; }
+
+/* ------------------------------------------------------------ hoje */
+.tela.hoje {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas: "relogio numeros" "campos campos";
+  gap: 24px;
+}
+/* O relógio se mede pelo cartão (cqi): na tela estreita ele vazava para o lado */
+.relogio { grid-area: relogio; display: flex; flex-direction: column; gap: 24px; container-type: inline-size; }
+.relogio .topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.selo { font-size: 13px; padding: 2px 8px; border-radius: 6px; background: var(--fundo-2); border: 1px solid var(--borda); color: var(--texto-2); }
+#tempo {
+  font-size: clamp(56px, min(16vh, 25cqi), 160px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+/* A sobra de altura se divide em duas: o relógio fica no meio do cartão e a
+   semana desce para o pé */
+#tempo, .semana-dias { margin-top: auto; }
+.semana-dias { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; padding-top: 24px; border-top: 1px solid var(--borda); }
+.dia-sem { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--texto-2); min-width: 0; }
+.dia-sem b { font-size: 15px; color: var(--texto); font-weight: 600; font-variant-numeric: tabular-nums; }
+.dia-sem.hoje .d { color: var(--azul); font-weight: 600; }
+.dia-sem.fora b { color: var(--texto-2); font-weight: 400; }
+.mini { height: 6px; border-radius: 3px; background: var(--trilho); overflow: hidden; }
+.mini span { display: block; height: 100%; border-radius: 3px; background: var(--serie); }
+.ritmo { display: flex; justify-content: space-between; gap: 4px 24px; flex-wrap: wrap; margin-top: -12px; color: var(--texto-2); }
+.rodape { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; color: var(--texto-2); }
+
+/* Linha do dia: chegada à esquerda, "pode sair" à direita, almoço no meio */
+.linha { position: relative; padding: 8px 0 0; }
+.trilho { position: relative; height: 14px; border-radius: 7px; background: var(--trilho); overflow: hidden; }
+.feito {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--serie);
+  border-radius: 7px;
+  transition: width 0.6s;
+}
+.trilho .almoco {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--almoco);
+  box-shadow: 0 0 0 2px var(--superficie);
+}
+.linha .agora, .linha .alvo-saida { position: absolute; top: 8px; height: 14px; transform: translateX(-50%); transition: left 0.6s; }
+.linha .agora {
+  width: 14px;
+  border-radius: 50%;
+  background: var(--texto);
+  box-shadow: 0 0 0 3px var(--superficie);
+}
+.linha .alvo-saida { top: 2px; height: 26px; width: 3px; border-radius: 2px; background: var(--ambar); }
+.escala { position: relative; height: 20px; margin-top: 8px; font-size: 13px; color: var(--texto-2); font-variant-numeric: tabular-nums; }
+.escala span { position: absolute; top: 0; white-space: nowrap; }
+#ldIni { left: 0; }
+#ldFim { right: 0; }
+#ldAlmocoRot { transform: translateX(-50%); color: var(--apagado); }
+
+/* Três números num cartão só, separados por linha: nenhum compete com o relógio */
+.numeros { grid-area: numeros; display: grid; grid-template-rows: repeat(3, 1fr); min-height: 0; padding-block: 0; }
+.numero { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding-block: 24px; }
+.numero + .numero { border-top: 1px solid var(--borda); }
+.numero .topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.big { font-size: 48px; font-weight: 600; line-height: 1.15; letter-spacing: -0.015em; }
+/* Âmbar é a cor da hora de sair, a mesma do marcador na linha do dia */
+#saida { color: var(--ambar); }
+.sub { color: var(--texto-2); font-size: 13px; }
+
+.campos-hoje {
+  grid-area: campos;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 32px;
+  padding-block: 16px;
+}
+.campos-hoje .grupo { display: inline-flex; align-items: center; gap: 8px; }
+.pendencia { flex-basis: 100%; margin: 0; display: flex; align-items: center; gap: 12px; color: var(--ambar); font-size: 15px; }
+.pendencia::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4 2.5 20h19Z'/%3E%3Cpath d='M12 10v4M12 17v.01'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* ------------------------------------------------------------ histórico */
+.historico { height: 100%; display: flex; flex-direction: column; gap: 16px; }
+.historico .topo { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; }
+.mesNav { display: flex; align-items: center; gap: 8px; }
+#tituloMes { font-size: 18px; font-weight: 600; min-width: 190px; text-align: center; }
+#resumo { color: var(--texto-2); flex: 1; }
+.acoes { display: flex; gap: 8px; flex-wrap: wrap; }
+.tabela { flex: 1; min-height: 0; overflow: auto; scrollbar-gutter: stable; margin: 0 -8px; }
+.tabela table { width: 100%; border-collapse: collapse; }
+.tabela th, .tabela td { padding: 4px 8px; text-align: start; white-space: nowrap; }
+.tabela thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--superficie);
+  font-weight: 600;
+  color: var(--texto-2);
+  font-size: 13px;
+  padding-block: 8px;
+}
+.tabela tbody th { font-weight: 400; }
+/* A sobra de largura vai para a coluna do ×, na ponta direita */
+.tabela .acao { width: 100%; text-align: end; }
+/* Trabalhado, valeu e por hora: números pela direita, casa sob casa */
+.tabela td.trab, .tabela td.trab ~ td, .tabela thead th:nth-child(n+7):nth-child(-n+9) { text-align: end; }
+.tabela tbody td, .tabela tbody th { border-top: 1px solid var(--borda); }
+.tabela td input, .tabela td select { padding-block: 4px; padding-inline-start: 8px; font-size: 15px; }
+.tabela td input { padding-inline-end: 8px; }
+.tabela td select { padding-inline-end: 26px; }
+.tabela td input[type=time] { width: 112px; }
+.tabela td input[type=number], .tabela td input[data-campo=almocoHoras] { width: 80px; }
+/* Com mouse, os campos da tabela só mostram a caixa na linha em uso: a
+   lista lê como tabela, não como formulário. No toque ficam sempre à vista. */
+@media (hover: hover) {
+  .tabela td input:not([aria-invalid="true"]), .tabela td select { border-color: transparent; background-color: transparent; }
+  .tabela td select { background-size: 0 0; }
+  .tabela td input[type=time]::-webkit-calendar-picker-indicator { opacity: 0; }
+  .tabela tbody tr:hover :is(input:not([aria-invalid="true"]), select),
+  .tabela td :is(input:not([aria-invalid="true"]), select):focus { border-color: var(--borda-campo); background-color: var(--fundo-2); }
+  .tabela tbody tr:hover select, .tabela td select:focus { background-size: 5px 5px; }
+  .tabela tbody tr:hover input[type=time]::-webkit-calendar-picker-indicator,
+  .tabela td input[type=time]:focus::-webkit-calendar-picker-indicator { opacity: 1; }
+}
+.tabela tr.vazio th, .tabela tr.futuro th, .tabela tr.feriado th { color: var(--apagado); }
+.tabela tr.hoje th { color: var(--azul); font-weight: 600; }
+.tabela tr.semana td { background: var(--fundo-2); color: var(--texto-2); font-size: 13px; padding: 8px; }
+.semanaLinha { display: flex; justify-content: space-between; gap: 16px; }
+.x { background: none; border: none; color: var(--apagado); font-size: 20px; line-height: 1; padding: 2px 8px; border-radius: 6px; cursor: pointer; }
+.x:hover { color: var(--vermelho); }
+
+/* ------------------------------------------------------------ estatísticas */
+/* Aqui rola a página inteira, não um painel: a barra de rolagem fica fora
+   do conteúdo e as bordas continuam alinhadas com o topo */
+body:has(#telaEstatisticas:not([hidden])) { height: auto; min-height: 100dvh; }
+.estatisticas { display: flex; flex-direction: column; gap: 24px; }
+.filtros { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  background: var(--borda);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--sombra-1);
+}
+/* O app.js monta cada número com .card; aqui ele vira uma célula da faixa,
+   e o vão de 1px entre as células desenha as divisórias */
+.kpis .kpi { flex: 1 1 170px; border: 0; border-radius: 0; box-shadow: none; padding: 16px 24px; display: flex; flex-direction: column; gap: 4px; }
+.kpi .rotulo { font-size: 13px; }
+.kpi strong { font-size: 24px; font-weight: 600; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.kpi > span { color: var(--texto-2); font-size: 13px; }
+.graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.graficos .largo { grid-column: 1 / -1; }
+figure.grafico { margin: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+figure.grafico figcaption { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+figure.grafico h2 { font-size: 15px; font-weight: 600; }
+figure.grafico .sub { margin-top: 2px; }
+.legenda-graf { display: flex; gap: 16px; font-size: 13px; color: var(--texto-2); }
+.chave { display: inline-flex; align-items: center; gap: 6px; }
+.chave::before { content: ""; width: 10px; height: 10px; border-radius: 2px; background: var(--serie); }
+.chave.traco::before { width: 14px; height: 2px; border-radius: 1px; background: var(--texto-2); }
+.area { position: relative; min-height: 200px; }
+.area svg { display: block; overflow: visible; }
+.area .vazio { color: var(--apagado); padding: 40px 0; text-align: center; }
+svg .barra { fill: var(--serie); }
+/* A semana em andamento: mais clara e com contorno tracejado */
+svg .barra.parcial { fill-opacity: 0.5; stroke: var(--serie); stroke-width: 1.5; stroke-dasharray: 3 2; }
+svg .barra.ativo, svg .seg.ativo { filter: brightness(1.18); }
+svg .meta { stroke: var(--texto-2); stroke-width: 2.5; stroke-linecap: round; }
+svg .grade { stroke: var(--grade); stroke-width: 1; shape-rendering: crispEdges; }
+svg .grade.base { stroke: var(--eixo); }
+svg .eixo { fill: var(--apagado); font-size: 13px; font-variant-numeric: tabular-nums; }
+svg .linha-serie { fill: none; stroke: var(--serie); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+svg .lavagem { fill: var(--serie); fill-opacity: 0.1; }
+svg .ponto { fill: var(--serie); stroke: var(--superficie); stroke-width: 2; }
+svg .rotulo-dado { fill: var(--texto); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+svg .seg { fill: var(--serie); }
+svg .ref { stroke: var(--texto-2); stroke-width: 1.5; }
+svg .ref-rot { fill: var(--texto-2); font-size: 13px; }
+svg .foco { display: none; }
+svg .foco.ativo { display: inline; }
+svg .foco line { stroke: var(--eixo); stroke-width: 1; }
+svg .alvo { fill: transparent; outline: none; cursor: default; }
+svg .alvo:focus-visible { stroke: var(--azul); stroke-width: 2; }
+.tabela-graf { overflow: auto; max-height: 320px; }
+.tabela-graf table { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+.tabela-graf th, .tabela-graf td { text-align: start; padding: 4px 8px; border-top: 1px solid var(--borda); }
+.tabela-graf thead th { color: var(--texto-2); font-weight: 600; border-top: 0; }
+.dica {
+  position: fixed;
+  z-index: 10;
+  pointer-events: none;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  box-shadow: var(--sombra-2);
+  min-width: 140px;
+}
+.dica .titulo { color: var(--texto-2); margin-bottom: 4px; }
+.dica div { display: flex; align-items: center; gap: 8px; }
+.dica b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.dica .tecla { width: 12px; height: 2px; border-radius: 1px; background: var(--serie); }
+.dica .tecla.neutra { background: var(--texto-2); }
+.dica .tecla.nada { background: none; }
+
+/* ------------------------------------------------------------ diálogo e aviso */
+dialog {
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  background: var(--superficie);
+  color: var(--texto);
+  padding: 24px;
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  box-shadow: var(--sombra-2);
+}
+dialog::backdrop { background: rgb(10 10 12 / 0.55); backdrop-filter: blur(3px); }
+dialog form { display: flex; flex-direction: column; gap: 16px; }
+dialog h2 { font-size: 18px; font-weight: 600; }
+dialog label { justify-content: space-between; }
+/* Todos os campos com a mesma largura: a coluna da direita fica alinhada */
+dialog label > select, dialog label > input:not([type=checkbox]) { width: var(--campo-ajuste); flex-shrink: 0; box-sizing: border-box; text-overflow: ellipsis; }
+dialog form { --campo-ajuste: 240px; }
+@media (max-width: 520px) { dialog form { --campo-ajuste: 170px; } }
+dialog .nota { color: var(--texto-2); font-size: 13px; }
+dialog fieldset { margin: 0; padding: 12px 16px 16px; border: 1px solid var(--borda); border-radius: 10px; display: flex; flex-direction: column; gap: 12px; }
+dialog legend { padding: 0 6px; color: var(--texto-2); font-size: 13px; font-weight: 600; }
+dialog .nota:empty { display: none; }
+dialog .nota a { color: inherit; }
+.extras { display: flex; flex-direction: column; gap: 8px; }
+.extra { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.extra + .extra { border-top: 1px solid var(--borda); padding-top: 8px; }
+/* Data e "todo ano" numa linha, nome e tipo na outra: o nome fica com a largura toda que sobra */
+.extra .quebra { flex-basis: 100%; height: 0; }
+dialog .extra input[type=text] { flex: 1; min-width: 160px; width: auto; }
+dialog .extra select { flex-shrink: 0; }
+.extra label { font-size: 13px; gap: 6px; }
+dialog .acoes { justify-content: flex-end; }
+/* Fechar fica sempre à vista, preso no pé do diálogo que rola */
+dialog form > .acoes:last-child {
+  position: sticky;
+  bottom: -24px;
+  margin: 0 -24px -24px;
+  padding: 16px 24px;
+  background: var(--superficie);
+  border-top: 1px solid var(--borda);
+}
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 8px 8px 8px 16px;
+  box-shadow: var(--sombra-2);
+  font-size: 15px;
+}
+
+.relatorio { display: none; }
+
+/* Tela estreita: uma coluna, com rolagem */
+@media (max-width: 900px) {
+  body { height: auto; min-height: 100dvh; }
+  main { padding: 0 16px 16px; }
+  .barra { padding: 12px 16px; }
+  .card { padding: 24px 16px; }
+  .tela.hoje { grid-template-columns: 1fr; grid-template-rows: none; grid-template-areas: "relogio" "numeros" "campos"; gap: 16px; }
+  .numeros { grid-template-rows: none; padding-block: 0; }
+  .numero { padding-block: 16px; }
+  .big { font-size: 32px; }
+  .campos-hoje { flex-direction: column; align-items: stretch; padding-block: 16px; }
+  .campos-hoje > label, .campos-hoje .grupo { justify-content: space-between; }
+  /* Caixa de marcar fica junto do texto dela, não na outra ponta */
+  .campos-hoje > label:has(input[type=checkbox]) { justify-content: flex-start; }
+  .campos-hoje .grupo:has(input[type=checkbox]) { flex-wrap: wrap; justify-content: flex-start; }
+  .campos-hoje .grupo > label:has(input[type=checkbox]) { flex-basis: 100%; }
+  .historico { height: auto; }
+  .tabela { max-height: 70vh; }
+  /* A tabela rola de lado: o dia fica preso e a borda esmaece para mostrar que há mais */
+  .tabela { mask-image: linear-gradient(to left, transparent, #000 24px); }
+  .tabela tbody th, .tabela thead th:first-child { position: sticky; inset-inline-start: 0; background: var(--superficie); }
+  .tabela thead th:first-child { z-index: 2; }
+  .tabela td.acao { padding-inline-end: 24px; }
+  .graficos { grid-template-columns: 1fr; }
+}
+/* Celular: marca e botões numa linha, telas na de baixo com a largura toda */
+@media (max-width: 520px) {
+  .barra { display: grid; grid-template-columns: 1fr auto; gap: 12px; }
+  .marca { flex-direction: column; align-items: flex-start; gap: 0; }
+  .marca h1 { align-self: auto; }
+  #hojeData { font-size: 13px; }
+  .direita { grid-area: 1 / 2; }
+  .barra nav { grid-area: 2 / 1 / 3 / -1; }
+  nav button { flex: 1; padding-inline: 8px; }
+  /* Período com a largura toda; em idioma de rótulo comprido, quebra em duas linhas de botões */
+  .segmentos { width: 100%; flex-wrap: wrap; }
+  .segmentos button { flex: 1 1 auto; padding-inline: 8px; }
+  /* O rótulo do almoço encosta nos da chegada e da saída */
+  #ldAlmocoRot { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* Impressão: só o relatório do mês, em branco e preto */
+@media print {
+  @page { size: A4; margin: 14mm 16mm; }
+  html, body { background: #fff !important; color: #000; height: auto; display: block; }
+  body > :not(.relatorio) { display: none !important; }
+  .relatorio { display: block; font: 10.5pt/1.4 "IBM Plex Sans", system-ui, sans-serif; color: #000; }
+  .relatorio h1 { font-size: 16pt; font-weight: 600; margin-bottom: 2pt; }
+  .relatorio .cab { color: #333; margin-bottom: 12pt; }
+  .relatorio table { width: 100%; border-collapse: collapse; }
+  .relatorio th, .relatorio td { border-bottom: 0.5pt solid #bbb; padding: 3pt 5pt; text-align: start; font-variant-numeric: tabular-nums; }
+  .relatorio thead th { border-bottom: 1pt solid #000; font-weight: 600; }
+  .relatorio tr.fora td { color: #666; }
+  .relatorio .totais { margin-top: 10pt; }
+  .relatorio .assinaturas { display: flex; gap: 48pt; margin-top: 56pt; }
+  .relatorio .assinaturas div { flex: 1; border-top: 0.75pt solid #000; padding-top: 4pt; text-align: center; }
+  .relatorio .gerado { margin-top: 18pt; color: #666; font-size: 9pt; }
+}

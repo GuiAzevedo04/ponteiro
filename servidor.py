@@ -43,6 +43,7 @@ ESTATICOS = {
     **{f"/fontes/{f}.woff2": f"fontes/{f}.woff2" for f in FONTES},
     "/": "index.html",
     "/index.html": "index.html",
+    "/estilo.css": "estilo.css",
     "/app.js": "app.js",
     "/calculo.js": "calculo.js",
     "/feriados.js": "feriados.js",
@@ -56,6 +57,7 @@ ESTATICOS = {
 # pode dizer text/plain para .js, e com nosniff o navegador recusa o módulo
 TIPOS = {
     ".html": "text/html; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
     ".js": "text/javascript; charset=utf-8",
     ".svg": "image/svg+xml",
     ".woff2": "font/woff2",
