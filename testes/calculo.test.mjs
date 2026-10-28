@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import * as C from "../calculo.js";
+import { pascoa } from "../feriados.js";
 
 // Compara como JSON, como a versão que rodava no Chrome: -0 e 0 são iguais
 const json = v => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
@@ -26,9 +27,9 @@ const d = C.deChave;
 const h = C.emMs;
 
 // Feriados: Páscoa de 2026 é 05/04
-igual("páscoa 2026", C.chaveDia(C.pascoa(2026)), "2026-04-05");
-igual("páscoa 2025", C.chaveDia(C.pascoa(2025)), "2025-04-20");
-igual("páscoa 2027", C.chaveDia(C.pascoa(2027)), "2027-03-28");
+igual("páscoa 2026", C.chaveDia(pascoa(2026)), "2026-04-05");
+igual("páscoa 2025", C.chaveDia(pascoa(2025)), "2025-04-20");
+igual("páscoa 2027", C.chaveDia(pascoa(2027)), "2027-03-28");
 igual("carnaval 2026", ["2026-02-16", "2026-02-17"].map(k => C.feriadoNacional(d(k))), ["Carnaval", "Carnaval"]);
 igual("sexta santa 2026", C.feriadoNacional(d("2026-04-03")), "Sexta-feira Santa");
 igual("corpus christi 2026", C.feriadoNacional(d("2026-06-04")), "Corpus Christi");
@@ -73,7 +74,7 @@ igual("semana com férias e folga", C.semana(seg, semana, 6), { ms: 10 * C.HORA,
 igual("semana até terça", C.semana(seg, semana, 6, "2026-10-06").saldo, -2 * C.HORA);
 igual("dia apagado sai do saldo",
   C.semana(seg, { ...semana, "2026-10-05": { apagado: true, atualizado: 1 } }, 6).saldo, -6 * C.HORA);
-igual("segunda da semana", C.chaveDia(C.segundaDa(d("2026-10-11"))), "2026-10-05");
+igual("segunda da semana", C.chaveDia(C.inicioDaSemana(d("2026-10-11"))), "2026-10-05");
 
 // Sincronização
 const { dados, localGanhou } = C.mesclar(
@@ -349,7 +350,7 @@ test("histórico, semanas e estatísticas dão o mesmo saldo", () => {
     let porMes = 0;
     for (let m = 0; m < 12; m++) porMes += C.totaisDoMes(C.linhasDoMes(2026, m, reg, 6, agora)).saldo;
     let porSemana = 0;
-    for (let s = C.segundaDa(C.deChave(C.inicio(reg, agora))); s <= agora; s = C.somaDias(s, 7)) {
+    for (let s = C.inicioDaSemana(C.deChave(C.inicio(reg, agora))); s <= agora; s = C.somaDias(s, 7)) {
       porSemana += C.semana(s, reg, 6, "2027-01-01").saldo;
     }
     const resumo = C.resumoPeriodo(reg, "2026-01-01", agora, 1500, 6).saldo;

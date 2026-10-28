@@ -2,9 +2,7 @@
 // Horários de um dia são "HH:MM"; trechos do dia viram ms desde a meia-noite.
 // O que depende do país (feriados, fim de semana) vem num calendário `cal`
 // (feriados.js); sem ele, vale o de antes dos ajustes de país: Brasil + 13/10.
-import { calendario, pascoa } from "./feriados.js";
-
-export { pascoa };
+import { calendario } from "./feriados.js";
 
 export const HORA = 3600000;
 export const MINUTO = 60000;
@@ -13,9 +11,7 @@ export const pad = n => String(n).padStart(2, "0");
 export const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 export const chaveDia = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 export const deChave = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
-export const ddmm = d => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`;
 export const somaDias = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-export const segundaDa = d => somaDias(d, -((d.getDay() + 6) % 7));
 export const desdeMeiaNoite = d => d - new Date(d.getFullYear(), d.getMonth(), d.getDate());
 export const DIAS = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
 
