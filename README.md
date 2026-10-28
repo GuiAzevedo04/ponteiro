@@ -1,131 +1,128 @@
 # Horas
 
-Controle de horas trabalhadas, saldo da semana e bolsa do mês. É uma página
-servida por um servidor pequeno em Python, que guarda tudo em
-`dados/registro.json`. Nada sai do computador.
+**Quanto já trabalhei hoje, que horas posso sair e quanto a bolsa já rendeu no
+mês, num relance.** Horas é um controle de ponto pessoal para quem tem meta de
+horas por semana e uma bolsa ou salário mensal. Roda no seu computador, sem
+conta, sem nuvem e sem anúncio.
 
-## Requisitos
+![Tela Hoje no tema escuro: relógio do dia em 06:00:41, linha do tempo com chegada, almoço e agora, "Posso sair às 15:00", dinheiro feito hoje e no mês, e a semana dia a dia](.github/tela-hoje.png)
 
-- Python 3.8 ou mais novo, só a biblioteca padrão.
-- Um navegador atual: Chrome, Edge, Firefox ou Safari.
-- Linux, macOS, FreeBSD ou Windows.
+<sub>Captura com dados fictícios.</sub>
 
-## Rodar
+## O que faz
 
-| Sistema | Comando, dentro da pasta `horas` |
+- **Relógio do dia.** Mostra o tempo trabalhado ao vivo, com a linha do tempo
+  da chegada, do almoço e de agora.
+- **"Posso sair às".** Calcula a hora de sair para bater a meta do dia, ou para
+  zerar o saldo da semana se você quiser compensar horas a mais ou a menos. Um
+  aviso do sistema aparece na hora certa.
+- **Dinheiro em tempo real.** Mostra quanto a bolsa rendeu hoje e no mês e o
+  valor da sua hora.
+- **Saldo da semana e do mês.** Mostra quanto falta para a meta da semana, por
+  dia, e como o mês fecha se você mantiver o ritmo.
+- **Histórico.** Todos os dias, editáveis, cada um marcado como trabalho,
+  folga, férias, atestado ou feriado. Exporta para CSV.
+- **Estatísticas.** Horas por semana contra a meta, saldo acumulado e o
+  expediente dia a dia, em 4, 12 ou 26 semanas ou tudo. Cada gráfico tem uma
+  versão em tabela.
+- **Feriados prontos.** Já conhece os feriados nacionais do Brasil, inclusive
+  Carnaval, Sexta-feira Santa e Corpus Christi. Os da sua cidade e os recessos
+  você acrescenta em Ajustes.
+- **Real ou dólar.** Recebe em uma moeda e mostra em outra, pela cotação do dia.
+- **Português ou inglês**, com datas, horas e números no formato de cada um.
+- **Tema claro, escuro ou automático**, e um modo de cores para daltonismo
+  (paleta Okabe–Ito). O saldo também tem sinal e o gráfico tem contorno, então
+  a cor nunca é a única pista.
+- **Ocultar valores.** Um clique troca todo o dinheiro por •••••, para abrir a
+  tela perto de outras pessoas.
+- **Funciona sem o servidor.** A página abre mesmo com o servidor desligado e
+  guarda tudo no navegador. Quando o servidor volta, os dados sobem sozinhos.
+  Dá para instalar como aplicativo pelo Chrome.
+
+## Seus dados ficam com você
+
+- Tudo fica em um arquivo, `dados/registro.json`, na sua máquina.
+- O servidor só atende o próprio computador (127.0.0.1) e só a própria página.
+  Outros sites não leem nem gravam nada.
+- Antes da primeira gravação de cada dia, o servidor faz um backup. As cópias
+  do último ano ficam em `dados/backups/`, e dá para voltar a qualquer dia
+  pelos Ajustes.
+- A única ida à internet é a cotação do dólar, uma vez por dia, em
+  `open.er-api.com`. Ela não leva nenhum dado seu.
+- Nada para instalar além do Python: o servidor usa só a biblioteca padrão.
+
+## Limites
+
+- **Uma pessoa, um computador.** Não abre no celular nem em outra máquina e
+  não sincroniza entre computadores.
+- **Semana de segunda a sexta.** Sábado e domingo são folga, a não ser que você
+  marque o dia como de trabalho.
+- **Só feriados nacionais do Brasil.** Os municipais e estaduais entram à mão,
+  uma vez, em Ajustes.
+- **Só real e dólar, só português e inglês.**
+- **Cotação de hoje para tudo.** Com "Mostrar em" numa moeda diferente da
+  bolsa, meses passados também são convertidos pela cotação do dia.
+- **Sem internet, vale a última cotação guardada.** Sem nenhuma, os valores
+  ficam na moeda da bolsa.
+
+## Onde foi testado
+
+| | Versão |
 |---|---|
-| Linux, FreeBSD | `python3 servidor.py` |
-| macOS | `python3 servidor.py` (o do Homebrew ou o do python.org) |
-| Windows | `py servidor.py` (instalador do python.org) ou `python servidor.py` |
+| Sistema | Ubuntu 24.04 LTS |
+| Python | 3.12 |
+| Navegador | Google Chrome 156, também sem janela (headless) |
 
-Depois é só abrir http://localhost:8765. Para usar outra porta, defina
-`HORAS_PORTA` antes de rodar.
+A pasta `autostart/` também traz arquivos para macOS, Windows e FreeBSD, mas
+eles não foram testados.
 
-## Pastas
+## Instalar no Linux
 
-- `pagina/`: tudo o que o navegador carrega (HTML, CSS, JavaScript, textos,
-  fontes e ícone).
-- `servidor.py`: o servidor; fica fora de `pagina/` e nunca é entregue.
-- `testes/`: testes da página e do servidor.
-- `autostart/`: arquivos para iniciar o servidor junto com o sistema.
-- `dados/`: seus dados, a cotação do dia e os backups. Fica fora do git e
-  nunca é entregue pela rede.
+Precisa de `git`, `python3` e um navegador atual.
 
-## Onde mudar o quê
-
-| Para mudar | Arquivo |
-|---|---|
-| Textos da tela | `pagina/idiomas/pt.js` e `pagina/idiomas/en.js` (as mesmas chaves nos dois) |
-| Cores, tamanhos e espaços | `pagina/estilo.css` (as cores ficam no começo, em `:root`) |
-| Feriados nacionais | `pagina/feriados.js` (os da cidade vão em Ajustes) |
-| Contas: saldo, bolsa, hora de sair | `pagina/calculo.js`, com testes em `testes/` |
-| Telas e botões | `pagina/index.html` (o que aparece) e `pagina/app.js` (o que faz) |
-| Gráficos das estatísticas | `pagina/graficos.js` |
-| Seus dados | `dados/registro.json`; prefira mudar pela página |
-
-O servidor só entrega os arquivos da lista `ESTATICOS` em `servidor.py`, e a
-página só abre sem servidor com os da lista `ARQUIVOS` em `pagina/sw.js`: um
-arquivo novo entra nas duas. As listas usam o endereço do navegador, sem o
-`pagina/` (`/app.js` é `pagina/app.js`). Depois de mudar o `servidor.py`, rode
-`systemctl --user restart horas.service`.
-
-## Iniciar junto com o sistema
-
-Os arquivos prontos ficam em `autostart/`. Em todos, confira o caminho da
-pasta `horas` e o do Python antes de instalar.
-
-- **Linux (systemd).** Copie `autostart/horas.service` para
-  `~/.config/systemd/user/` e rode `systemctl --user enable --now horas.service`.
-  Depois de mudar o `servidor.py`, rode `systemctl --user restart horas.service`.
-- **macOS (launchd).** Troque `SEU_USUARIO` em
-  `autostart/com.horas.servidor.plist`, copie o arquivo para
-  `~/Library/LaunchAgents/` e rode
-  `launchctl load ~/Library/LaunchAgents/com.horas.servidor.plist`.
-  Deixe a pasta `horas` fora de Documentos, Mesa e Downloads. O macOS impede,
-  sem aviso, que um programa iniciado pelo launchd leia essas pastas.
-- **Windows.** Aperte Win+R, digite `shell:startup` e crie, na pasta que abrir,
-  um atalho para `autostart\horas-windows.cmd`. Ele abre o servidor com
-  `pythonw`, sem janela. Para parar o servidor, encerre o `pythonw.exe` no
-  Gerenciador de Tarefas.
-- **FreeBSD (e outros Unix sem systemd).** Instale o Python com
-  `pkg install python3`, rode `crontab -e` e acrescente a linha de
-  `autostart/freebsd-crontab.txt`.
-
-## Feriados, moeda e idioma
-
-Tudo isso fica em Ajustes.
-
-- **Feriados:** os nacionais do Brasil, mais os feriados extras. Os extras
-  valem por cima dos nacionais: o feriado da cidade, um recesso, ou um dia
-  que vira de trabalho.
-- **Moeda da bolsa e "Mostrar em":** real ou dólar. A bolsa fica guardada na
-  moeda em que se recebe. Com "Mostrar em" diferente, todos os valores
-  aparecem convertidos pela cotação do dia. Quem busca a cotação é o
-  servidor, uma vez por dia, em `open.er-api.com` (grátis, sem conta), e
-  guarda em `dados/cambio.json`. É a única ida do app à internet e não leva nada
-  dos seus dados. Sem internet, vale a última cotação; sem cotação nenhuma,
-  os valores ficam na moeda da bolsa. Meses passados também usam a cotação
-  de hoje.
-- **Idioma:** português ou inglês. Na primeira visita vale o do navegador.
-  Datas, horários e dinheiro seguem o idioma (5:00 PM em inglês, 17:00 em
-  português); o que fica guardado em `dados/registro.json` não muda.
-- **Duração do almoço:** dá para digitar `1h30`, `1:30`, `1,5`, `1.5 hours`
-  ou `35 min`, nos dois idiomas.
-- **CSV:** em português, separado por `;` com vírgula decimal; em inglês, por
-  `,` com ponto.
-
-## Cores para daltonismo
-
-Em Ajustes, "Cores: Para daltonismo" troca o verde e o vermelho do saldo (que
-na deuteranopia e na protanopia ficam iguais) por azul e laranja, da paleta
-Okabe–Ito, nos dois temas. As cores foram escolhidas para continuar distintas
-nos três tipos de daltonismo simulados e com contraste AA, também com filtro
-de luz azul ligado. Em qualquer modo, o saldo tem sinal (+/−), o campo com
-erro tem borda tracejada, o aviso de saída faltando tem ⚠ e a semana em
-andamento nos gráficos tem contorno tracejado.
-
-## Dados e backups
-
-- **Fonte da verdade:** `dados/registro.json`. O navegador guarda uma cópia, para a
-  página abrir mesmo com o servidor desligado. O que mudar nesse meio-tempo
-  sobe quando o servidor voltar.
-- **Backup diário:** antes da primeira gravação de cada dia, o servidor copia
-  o arquivo para `dados/backups/` e guarda as cópias do último ano.
-- **Restaurar:** em Ajustes, escolha o dia em "Voltar ao começo de".
-- **Segurança:** o servidor só atende o próprio computador (127.0.0.1) e só a
-  própria página. Outros sites não leem nem gravam os dados.
-
-## Testes
+**1. Baixe.** O serviço espera a pasta em `~/Documentos/horas`:
 
 ```sh
-node --test                                 # contas da página (Node 22+, testado no 24)
-python3 -m unittest discover -s testes      # servidor (no Windows: py -m unittest ...)
+git clone https://github.com/GuiAzevedo04/ponteiro.git ~/Documentos/horas
 ```
 
-Os testes do servidor também simulam o Windows: o tipo do `.js`, o arquivo
-preso por um antivírus e a pasta que não abre para fsync.
+Para usar outra pasta, troque o caminho na linha `ExecStart` de
+`autostart/horas.service` antes do passo 3.
 
-## Fontes
+**2. Experimente.**
 
-A IBM Plex Sans vem junto em `pagina/fontes/`, com a licença OFL em
-`pagina/fontes/OFL.txt`.
+```sh
+cd ~/Documentos/horas
+python3 servidor.py
+```
+
+Abra http://localhost:8765. Para parar, use Ctrl+C.
+
+**3. Ligue o serviço**, para o servidor subir sozinho toda vez que você entrar
+na sessão e voltar se cair:
+
+```sh
+mkdir -p ~/.config/systemd/user
+cp autostart/horas.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now horas.service
+```
+
+**4. Instale como aplicativo (opcional).** No Chrome, abra
+http://localhost:8765 e use o ícone de instalar na barra de endereço. A página
+vira uma janela própria, com ícone no menu.
+
+### No dia a dia
+
+| Para | Comando |
+|---|---|
+| Ver se está rodando | `systemctl --user status horas.service` |
+| Ver o registro do servidor | `journalctl --user -u horas.service -n 50` |
+| Atualizar | `git -C ~/Documentos/horas pull && systemctl --user restart horas.service` |
+| Usar outra porta | acrescente `Environment=HORAS_PORTA=8800` em `[Service]` no `horas.service` |
+| Desligar de vez | `systemctl --user disable --now horas.service` |
+
+## Licença
+
+MIT, em `LICENSE`. A fonte IBM Plex Sans vem junto em `pagina/fontes/`, sob a
+licença OFL (`pagina/fontes/OFL.txt`).
