@@ -1,5 +1,5 @@
 // Português (Brasil): o idioma de origem. O en.js tem
-// as mesmas chaves (testes/idiomas.test.mjs confere). Textos com valores são
+// as mesmas chaves. Textos com valores são
 // funções, para cada idioma pôr as palavras e o plural no lugar certo.
 import { DURACAO_PT, DIAS, CSV_PT } from "../calculo.js";
 
