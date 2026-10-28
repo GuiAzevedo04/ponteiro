@@ -1,4 +1,4 @@
-// Português (Brasil): o idioma de origem. Os outros arquivos desta pasta têm
+// Português (Brasil): o idioma de origem. O en.js tem
 // as mesmas chaves (testes/idiomas.test.mjs confere). Textos com valores são
 // funções, para cada idioma pôr as palavras e o plural no lugar certo.
 import { DURACAO_PT, DIAS, CSV_PT } from "../calculo.js";
@@ -9,7 +9,6 @@ export default {
   codigo: "pt",
   locale: "pt-BR",
   nome: "Português",
-  dir: "ltr",
   duracao: DURACAO_PT,
   // Rótulos dos eixos dos gráficos: horas somadas e hora do dia
   eixoHoras: v => `${v}h`,
@@ -17,9 +16,6 @@ export default {
   dias: DIAS,
   tipos: { trabalho: "Trabalho", folga: "Folga", ferias: "Férias", atestado: "Atestado", feriado: "Feriado/recesso" },
   csv: CSV_PT,
-  // Nomes de feriados que não estão em feriados.js (lá já tem pt e en)
-  feriados: {},
-  observado: "observado",
 
   t: {
     app: "Horas",
@@ -197,7 +193,6 @@ export default {
     // ajustes
     horasSemana: "Horas por semana",
     bolsaMensal: "Bolsa mensal",
-    pais: "País",
     moedaBolsa: "Moeda da bolsa",
     moeda: "Mostrar em",
     nomeRelatorio: "Nome no relatório",
@@ -209,13 +204,10 @@ export default {
     cores: "Cores",
     coresPadrao: "Padrão",
     coresDaltonismo: "Para daltonismo",
-    nenhumPais: "Nenhum (só os feriados extras)",
-    doPais: moeda => (moeda ? `Do país (${moeda})` : "Do país"),
-    igualBolsa: moeda => (moeda ? `Igual à da bolsa (${moeda})` : "Igual à da bolsa"),
     cotacao: (de, para, taxa, data) => `1 ${de} = ${taxa} ${para} · cotação de ${data}.`,
     semCotacao: moeda => `Sem cotação ainda (o servidor busca na internet uma vez por dia): valores em ${moeda}.`,
     feriadosExtras: "Feriados extras",
-    feriadosExtrasNota: "Valem por cima dos do país: feriado da cidade, recesso, ou um dia que vira de trabalho (como as trocas de dia na China).",
+    feriadosExtrasNota: "Valem por cima dos nacionais: feriado da cidade, recesso, ou um dia que vira de trabalho.",
     adicionar: "Adicionar",
     data: "Data",
     todoAno: "todo ano",

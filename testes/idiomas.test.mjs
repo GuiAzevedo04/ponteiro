@@ -1,4 +1,4 @@
-// Testes dos idiomas (idiomas/*.js) e da leitura de durações em todos eles.
+// Testes dos idiomas (idiomas/*.js) e da leitura de durações nos dois.
 // Rodar com: node --test
 process.env.TZ = "America/Sao_Paulo";
 
@@ -8,7 +8,7 @@ import { readFileSync } from "node:fs";
 import * as C from "../calculo.js";
 import pt from "../idiomas/pt.js";
 
-const CODIGOS = ["pt", "en", "es", "fr", "ru", "ar", "hi", "bn", "zh", "ja"];
+const CODIGOS = ["pt", "en"];
 const IDIOMAS = Object.fromEntries(await Promise.all(CODIGOS.map(async c => [c, (await import(`../idiomas/${c}.js`)).default])));
 
 // Argumentos de exemplo para os textos que são função
@@ -23,7 +23,6 @@ for (const [codigo, I] of Object.entries(IDIOMAS)) {
     assert.deepEqual(Object.keys(I.tipos).sort(), Object.keys(pt.tipos).sort());
     assert.equal(I.csv.cab.length, pt.csv.cab.length);
     assert.equal(I.t.relColunas.length, pt.t.relColunas.length);
-    assert.ok(["ltr", "rtl"].includes(I.dir));
     assert.ok(new Intl.Locale(I.locale).language === codigo);
   });
 
@@ -71,21 +70,18 @@ test("o CSV em português pelo app é o mesmo de antes", () => {
   assert.equal(pelo, C.csvDoMes(linhas));
 });
 
-test("durações digitadas em qualquer idioma e escrita", () => {
+test("durações digitadas em português ou inglês", () => {
   const casos = {
     "1 h 30 min": 1.5, "1h 30m": 1.5, "1 hour 30 minutes": 1.5, "1.5 hours": 1.5, "90 min": 1.5, "35 minutos": 35 / 60,
-    "1 ч 30 мин": 1.5, "1 ч. 30 мин.": 1.5, "1,5 ч": 1.5, "90 минут": 1.5, "2 часа": 2,
-    "1小时30分钟": 1.5, "1个小时": 1, "35分钟": 35 / 60, "1時間30分": 1.5, "１時間３０分": 1.5, "１：３０": 1.5,
-    "1 घंटा 30 मिनट": 1.5, "१ घं ३० मि": 1.5, "1 ঘণ্টা 30 মিনিট": 1.5, "১ ঘ ৩০ মি": 1.5,
-    "1 ساعة 30 دقيقة": 1.5, "١ س ٣٠ د": 1.5, "١٫٥": 1.5, "۱:۳۰": 1.5, "1 h 30": 1.5, "45 min": 0.75,
+    "2 horas": 2, "1 min.": 1 / 60, "1,5": 1.5, "1:30": 1.5, "1 h 30": 1.5, "45 min": 0.75,
   };
   for (const [texto, horas] of Object.entries(casos)) {
     assert.ok(Math.abs(C.lerDuracao(texto) - horas) < 1e-9, `"${texto}" → ${C.lerDuracao(texto)}`);
   }
-  for (const ruim of ["1h3x", "abc", "-1", "ч", "1 ч 30 км"]) assert.equal(C.lerDuracao(ruim), null, ruim);
+  for (const ruim of ["1h3x", "abc", "-1", "h", "1 h 30 km"]) assert.equal(C.lerDuracao(ruim), null, ruim);
 });
 
-test("horário e data no jeito de cada idioma, com 0-9", () => {
+test("horário e data no jeito de cada idioma", () => {
   assert.equal(C.fmtHora(9 * C.HORA + 5 * C.MINUTO), "09:05");
   assert.equal(C.fmtHora(17 * C.HORA, "en-US"), "5:00 PM");
   assert.equal(C.fmtHora(17 * C.HORA + 30 * C.MINUTO - 1, "pt-BR", Math.ceil), "17:30");

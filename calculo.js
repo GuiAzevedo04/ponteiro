@@ -1,7 +1,7 @@
 // Cálculos da página de horas, sem DOM: o app.js desenha, os testes conferem.
 // Horários de um dia são "HH:MM"; trechos do dia viram ms desde a meia-noite.
-// O que depende do país (feriados, fim de semana) vem num calendário `cal`
-// (feriados.js); sem ele, vale o de antes dos ajustes de país: Brasil + 13/10.
+// Feriados e fim de semana vêm num calendário `cal` (feriados.js); sem ele,
+// vale CAL_PADRAO: Brasil + 13/10.
 import { calendario } from "./feriados.js";
 
 export const HORA = 3600000;
@@ -17,17 +17,13 @@ export const DIAS = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
 
 // Criar o Intl.NumberFormat custa mais que formatar: um por moeda e idioma
 const formatos = new Map();
-// Em árabe, o "$" de "R$" na ponta do texto toma a direção da frase e pula para
-// o outro lado do "R"; uma marca da esquerda para a direita depois do símbolo
-// o segura no lugar
-const DA_DIREITA = /^(ar|he|fa|ur)\b/;
-const segurarSimbolo = (texto, idioma) => (DA_DIREITA.test(idioma) ? texto.replace(/(\p{Sc})/u, "$1\u200e") : texto);
-
-export function dinheiro(v, moeda = "BRL", idioma = "pt-BR") {
+function formatoMoeda(moeda, idioma) {
   const k = `${moeda}:${idioma}`;
-  if (!formatos.has(k)) formatos.set(k, new Intl.NumberFormat(`${idioma}-u-nu-latn`, { style: "currency", currency: moeda }));
-  return segurarSimbolo(formatos.get(k).format(v), idioma);
+  if (!formatos.has(k)) formatos.set(k, new Intl.NumberFormat(idioma, { style: "currency", currency: moeda }));
+  return formatos.get(k);
 }
+
+export const dinheiro = (v, moeda = "BRL", idioma = "pt-BR") => formatoMoeda(moeda, idioma).format(v);
 // Quanto vale 1 `de` em `para`, pelas cotações do servidor (todas contra a
 // mesma base). null quando falta uma das duas: aí não se converte nada
 export function taxaCambio(cambio, de, para) {
@@ -41,17 +37,14 @@ export function taxaCambio(cambio, de, para) {
 export const simboloMoeda = (moeda = "BRL", idioma = "pt-BR") =>
   new Intl.NumberFormat(idioma, { style: "currency", currency: moeda }).formatToParts(0).find(p => p.type === "currency").value;
 
-// Valor oculto ("R$ •••••") montado pelo próprio Intl: o símbolo fica do lado e
-// com as marcas de direção que o idioma usa (em árabe, à direita)
-export function dinheiroOculto(moeda = "BRL", idioma = "pt-BR") {
-  if (!formatos.has(`${moeda}:${idioma}`)) dinheiro(0, moeda, idioma);
-  return segurarSimbolo(formatos.get(`${moeda}:${idioma}`).formatToParts(0)
-    .map(p => (p.type === "integer" ? "•••••" : ["decimal", "fraction", "group"].includes(p.type) ? "" : p.value)).join(""), idioma);
-}
+// Valor oculto ("R$ •••••") montado pelo próprio Intl: o símbolo fica do lado
+// e com o espaço que o idioma usa
+export const dinheiroOculto = (moeda = "BRL", idioma = "pt-BR") => formatoMoeda(moeda, idioma).formatToParts(0)
+  .map(p => (p.type === "integer" ? "•••••" : ["decimal", "fraction", "group"].includes(p.type) ? "" : p.value)).join("");
 
 // Como um idioma escreve durações: `total` é a soma de horas ("6h00") e
 // `almoco` a duração curta que se digita ("35min", "1h", "1h30"). O padrão é
-// o português; cada idiomas/*.js tem o seu, e lerDuracao entende todos.
+// o português; idiomas/en.js tem o seu, e lerDuracao entende os dois.
 export const DURACAO_PT = {
   total: (h, mm) => `${h}h${mm}`,
   almoco: (h, m) => (h ? `${h}h${m ? pad(m) : ""}` : `${m}min`),
@@ -63,33 +56,20 @@ export function fmtH(ms, d = DURACAO_PT) {
 }
 export const fmtSaldo = (ms, d = DURACAO_PT) => (ms < 0 ? "−" : "+") + fmtH(ms, d);
 
-// Algarismos de outras escritas viram 0-9: árabe, persa/urdu, devanágari e
-// bengali (os de largura cheia do chinês e japonês o NFKC já resolve)
-const ALGARISMOS = [0x0660, 0x06f0, 0x0966, 0x09e6];
-const emAscii = s => s.replace(/[\u0660-\u0669\u06f0-\u06f9\u0966-\u096f\u09e6-\u09ef]/g, c => {
-  const cp = c.codePointAt(0);
-  return String(cp - ALGARISMOS.find(b => cp >= b && cp <= b + 9));
-});
-
-// Palavras de hora e de minuto dos idiomas do app, por extenso e abreviadas.
-// Valem em qualquer idioma: quem digita "1h30" com o app em russo também é entendido.
-const HORAS = ["horas", "hora", "hours", "hour", "hrs", "hr", "heures", "heure", "часов", "часа", "час", "ч",
-  "小时", "小時", "時間", "时", "घंटे", "घंटा", "घं", "ঘণ্টা", "ঘন্টা", "ঘ", "ساعات", "ساعة", "ساعه", "س"];
-const MINUTOS = ["minutos", "minuto", "minutes", "minute", "mins", "min", "минут", "минуты", "минута", "мин",
-  "分钟", "分鐘", "分", "मिनट", "मि", "মিনিট", "মি", "دقائق", "دقيقة", "دقيقه", "د"];
+// Palavras de hora e de minuto em português e inglês, por extenso e abreviadas.
+// Valem nos dois idiomas: quem digita "1 hour" com o app em português também é entendido.
+const HORAS = ["horas", "hora", "hours", "hour", "hrs", "hr"];
+const MINUTOS = ["minutos", "minuto", "minutes", "minute", "mins", "min"];
 const UNIDADE = new Map([...HORAS.map(p => [p, "h"]), ...MINUTOS.map(p => [p, "m"])]);
-// A mais longa primeiro ("horas" antes de "hora", "時間" antes de "時"), e o
-// ponto de abreviação ("мин.") vai junto
+// A mais longa primeiro ("horas" antes de "hora"), e o ponto de abreviação ("min.") vai junto
 const PALAVRAS = new RegExp(`(${[...UNIDADE.keys()].sort((a, b) => b.length - a.length).join("|")})\\.?`, "g");
 
 // Duração do almoço como a pessoa digita: "35", "35min", "1h30", "1:30", "1,5",
-// "1.5", "1,5h" ou "1:10h", e o mesmo nos outros idiomas ("1 ч 30 мин",
-// "1小时30分", "١ س ٣٠ د"). Número solto abaixo de 10 é hora, de 10 em diante é
-// minuto (ninguém almoça 35 horas). Devolve horas, ou null se não der para entender.
+// "1.5", "1,5h", "1:10h" ou "1 hour 30 minutes". Número solto abaixo de 10 é
+// hora, de 10 em diante é minuto (ninguém almoça 35 horas). Devolve horas, ou
+// null se não der para entender.
 export function lerDuracao(texto) {
-  const s = emAscii(String(texto ?? "").normalize("NFKC").trim().toLowerCase())
-    .replace(/\u066b/g, ".") // vírgula decimal árabe
-    .replace(/[\u0970个]/g, "") // ponto de abreviação hindi; "um" do chinês (1个小时)
+  const s = String(texto ?? "").trim().toLowerCase()
     .replace(PALAVRAS, (_, p) => UNIDADE.get(p))
     .replace(/\s+/g, "");
   if (!s) return 0;
@@ -120,7 +100,7 @@ export function msParaHhmm(ms, arredonda = Math.floor) {
 }
 
 // Horário e data para mostrar, no jeito do idioma ("17:00", "5:00 PM";
-// "22/10", "10/22"), sempre com algarismos 0-9. O que se guarda continua "HH:MM".
+// "22/10", "10/22"). O que se guarda continua "HH:MM".
 const intl = new Map();
 function formato(chave, criar) {
   if (!intl.has(chave)) intl.set(chave, criar());
@@ -130,31 +110,25 @@ export function fmtHora(ms, locale = "pt-BR", arredonda = Math.floor) {
   const f = formato(`hora:${locale}`, () => {
     const doze = new Intl.DateTimeFormat(locale, { hour: "numeric" }).resolvedOptions().hour12;
     // No relógio de 12 horas, "5:00 PM" em vez de "05:00 PM"
-    return new Intl.DateTimeFormat(`${locale}-u-nu-latn`, { hour: doze ? "numeric" : "2-digit", minute: "2-digit", timeZone: "UTC" });
+    return new Intl.DateTimeFormat(locale, { hour: doze ? "numeric" : "2-digit", minute: "2-digit", timeZone: "UTC" });
   });
   const min = ((arredonda(ms / MINUTO) % 1440) + 1440) % 1440;
   return f.format(Date.UTC(2000, 0, 1, 0, min));
 }
-// Sem as marcas de direção que o Intl põe em árabe ("12\u200f/10"): dentro de
-// um gráfico, que é da esquerda para a direita, elas viram "/1012"
 export const fmtDiaMes = (d, locale = "pt-BR") =>
-  formato(`dm:${locale}`, () => new Intl.DateTimeFormat(`${locale}-u-nu-latn`, { day: "2-digit", month: "2-digit" }))
-    .format(d).replace(/[\u200e\u200f\u061c]/g, "");
+  formato(`dm:${locale}`, () => new Intl.DateTimeFormat(locale, { day: "2-digit", month: "2-digit" })).format(d);
 export const fmtData = (d, locale, opcoes) =>
-  formato(`d:${locale}:${JSON.stringify(opcoes)}`, () => new Intl.DateTimeFormat(`${locale}-u-nu-latn`, opcoes)).format(d);
+  formato(`d:${locale}:${JSON.stringify(opcoes)}`, () => new Intl.DateTimeFormat(locale, opcoes)).format(d);
 export const fmtNumero = (n, locale = "pt-BR", casas = 2) =>
-  formato(`n:${locale}:${casas}`, () => new Intl.NumberFormat(`${locale}-u-nu-latn`, { maximumFractionDigits: casas, useGrouping: false })).format(n);
+  formato(`n:${locale}:${casas}`, () => new Intl.NumberFormat(locale, { maximumFractionDigits: casas, useGrouping: false })).format(n);
 
 // ------------------------------------------------------------------ calendário
 
-// Antes de o país entrar nos ajustes, o app tinha o calendário do Brasil mais
-// o aniversário da cidade (13/10): é o padrão de toda função que recebe `cal`
-export const CAL_PADRAO = calendario({
-  pais: "BR", extras: [{ data: "10-13", nome: "Aniversário da cidade", tipo: "feriado" }],
-});
+// Brasil mais o aniversário da cidade (13/10): o padrão de toda função que
+// recebe `cal`, usado nos testes
+export const CAL_PADRAO = calendario({ extras: [{ data: "10-13", nome: "Aniversário da cidade", tipo: "feriado" }] });
 
 export const feriadoNacional = (d, cal = CAL_PADRAO) => cal.feriado(d);
-// Primeiro dia da semana do país (segunda; domingo onde a folga é sexta e sábado)
 export const inicioDaSemana = (d, cal = CAL_PADRAO) => somaDias(d, -((d.getDay() - cal.inicioSemana + 7) % 7));
 
 // ------------------------------------------------------------------ dias
@@ -467,7 +441,7 @@ export function totaisDoMes(linhas) {
 }
 
 // O CSV em português: ";" e vírgula decimal, que é como o LibreOffice e o
-// Excel em português abrem certo. Outros idiomas passam os seus.
+// Excel em português abrem certo. O inglês passa o seu.
 export const CSV_PT = {
   cab: ["data", "dia_semana", "tipo", "chegada", "almoco_inicio", "almoco_horas", "saida",
     "horas_trabalhadas", "meta_horas"],

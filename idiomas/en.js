@@ -6,7 +6,6 @@ export default {
   codigo: "en",
   locale: "en-US",
   nome: "English",
-  dir: "ltr",
   duracao: {
     total: (h, mm) => `${h}h ${mm}m`,
     almoco: (h, m) => (h ? (m ? `${h}h ${pad(m)}m` : `${h}h`) : `${m}m`),
@@ -18,8 +17,6 @@ export default {
     cab: ["date", "weekday", "type", "arrival", "lunch_start", "lunch_hours", "departure", "hours_worked", "target_hours"],
     decimal: ".",
   },
-  feriados: {},
-  observado: "observed",
 
   t: {
     app: "Hours",
@@ -190,7 +187,6 @@ export default {
 
     horasSemana: "Hours per week",
     bolsaMensal: "Monthly stipend",
-    pais: "Country",
     moedaBolsa: "Stipend currency",
     moeda: "Show in",
     nomeRelatorio: "Name on the report",
@@ -202,13 +198,10 @@ export default {
     cores: "Colors",
     coresPadrao: "Default",
     coresDaltonismo: "Colorblind-friendly",
-    nenhumPais: "None (only extra holidays)",
-    doPais: moeda => (moeda ? `Country default (${moeda})` : "Country default"),
-    igualBolsa: moeda => (moeda ? `Same as stipend (${moeda})` : "Same as stipend"),
     cotacao: (de, para, taxa, data) => `1 ${de} = ${taxa} ${para} · rate from ${data}.`,
     semCotacao: moeda => `No exchange rate yet (the server fetches one online once a day): amounts in ${moeda}.`,
     feriadosExtras: "Extra holidays",
-    feriadosExtrasNota: "They take precedence over the country's: a city holiday, a break, or a day that becomes a working day (like China's swapped days).",
+    feriadosExtrasNota: "They take precedence over the national ones: a city holiday, a break, or a day that becomes a working day.",
     adicionar: "Add",
     data: "Date",
     todoAno: "every year",

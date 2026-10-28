@@ -7,7 +7,7 @@ import {
   saidaAntes, semana, saidaPara, inicio, diasDoMes, mesclar, linhasDoMes, totaisDoMes, csvDoMes, semanasAte,
   diasFechados, resumoPeriodo, lerDuracao, fmtDuracao, ritmoSemana, projecaoMes, restaurar, taxaCambio,
 } from "./calculo.js";
-import { calendario, PAISES } from "./feriados.js";
+import { calendario } from "./feriados.js";
 import pt from "./idiomas/pt.js";
 
 // A busca sai antes de tudo; a tela só espera por ela se o navegador ainda
@@ -18,7 +18,7 @@ const $ = id => document.getElementById(id);
 
 // ------------------------------------------------------------------ idioma
 
-// O idioma da tela (idiomas/*.js). Português vem junto; os outros se carregam
+// O idioma da tela (idiomas/*.js). Português vem junto; o inglês se carrega
 // na hora de usar. `t` são os textos; o resto, formatos.
 let T = pt;
 const t = () => T.t;
@@ -33,10 +33,7 @@ const duracao = horas => fmtDuracao(horas, T.duracao);
 const nomeTipo = tipo => T.tipos[tipo];
 
 // Os idiomas do app, cada um pelo próprio nome
-const IDIOMAS = {
-  pt: "Português", en: "English", es: "Español", fr: "Français", ru: "Русский",
-  ar: "العربية", hi: "हिन्दी", bn: "বাংলা", zh: "中文", ja: "日本語",
-};
+const IDIOMAS = { pt: "Português", en: "English" };
 const carregados = { pt };
 async function carregarIdioma(codigo) {
   if (!IDIOMAS[codigo]) codigo = "pt";
@@ -64,7 +61,6 @@ function traduzirPagina() {
   const x = t();
   const texto = e => (typeof x[e.dataset.t] === "function" ? x[e.dataset.t](e.dataset.tArg) : x[e.dataset.t]);
   document.documentElement.lang = T.locale;
-  document.documentElement.dir = T.dir;
   for (const e of document.querySelectorAll("[data-t]")) poe(e, texto(e));
   for (const [dado, atributo] of [["tAria", "aria-label"], ["tTitle", "title"], ["tPlaceholder", "placeholder"]]) {
     const nome = `data-${dado.replace(/[A-Z]/g, l => `-${l.toLowerCase()}`)}`;
@@ -131,11 +127,6 @@ let pendente = local.ler("horas.pendente") === "1";
 let online = null;
 let edicoes = 0;
 
-// País e feriados extras. Quem usava o app antes de existir o país nos ajustes
-// tinha o Brasil e o aniversário da cidade (13/10): é o que vale até a
-// migração gravar os dois (migrarPais)
-const EXTRAS_DE_ANTES = [{ data: "10-13", nome: "Aniversário da cidade", tipo: "feriado" }];
-
 function lerExtras(json) {
   try {
     const lista = JSON.parse(json);
@@ -146,16 +137,10 @@ function lerExtras(json) {
 }
 
 let calGuardado = { chave: null, cal: null };
-function calDe(pais, extras) {
-  const chave = `${pais}|${extras}|${T.codigo}`;
+function calDe(extras) {
+  const chave = `${extras}|${T.codigo}`;
   if (calGuardado.chave !== chave) {
-    calGuardado = {
-      chave,
-      cal: calendario({
-        pais, extras: lerExtras(extras), idioma: T.codigo,
-        traducoes: { ...T.feriados, observado: T.observado }, semNome: t().feriado,
-      }),
-    };
+    calGuardado = { chave, cal: calendario({ extras: lerExtras(extras), idioma: T.codigo, semNome: t().feriado }) };
   }
   return calGuardado.cal;
 }
@@ -178,15 +163,14 @@ async function buscarCambio() {
 
 function cfg() {
   const c = { ...PADRAO, ...dados?.campos };
-  const pais = c.pais ?? "BR";
-  const cal = calDe(pais, c.feriadosExtras ?? JSON.stringify(EXTRAS_DE_ANTES));
+  const cal = calDe(c.feriadosExtras ?? "[]");
   // A bolsa é guardada na moeda em que se recebe; a tela pode mostrar em
   // outra. Sem cotação, mostra na da bolsa mesmo
-  const moedaBolsa = c.moedaBolsa || cal.moeda;
+  const moedaBolsa = c.moedaBolsa || "BRL";
   const moedaPedida = c.moeda || moedaBolsa;
   const taxa = taxaCambio(cambio, moedaBolsa, moedaPedida);
   return {
-    pais, cal, moedaBolsa, moedaPedida,
+    cal, moedaBolsa, moedaPedida,
     idioma: c.idioma ?? local.ler("horas.idioma") ?? "pt",
     moeda: taxa === null ? moedaBolsa : moedaPedida,
     taxa: taxa ?? 1,
@@ -694,7 +678,7 @@ function desenharLinha(desde, ms) {
       : t().podeSair(hora(calc.saida, Math.ceil)));
 }
 
-// Os dias de trabalho desta semana (os do país, mais um fim de semana trocado
+// Os dias de trabalho desta semana (segunda a sexta, mais um fim de semana trocado
 // para trabalho), com o trabalhado de cada um
 function desenharSemana(msHoje) {
   const { cal } = cfg();
@@ -866,30 +850,18 @@ function toast(texto, acao, duracao = 7000) {
 
 // ------------------------------------------------------------------ ajustes
 
-const CAMPOS_AJUSTES = ["horasSemana", "salario", "nome", "idioma", "tema", "cores", "pais", "moedaBolsa", "moeda"];
+const CAMPOS_AJUSTES = ["horasSemana", "salario", "nome", "idioma", "tema", "cores", "moedaBolsa", "moeda"];
 $("idioma").innerHTML = Object.entries(IDIOMAS).map(([k, n]) => `<option value="${k}" lang="${k}">${esc(n)}</option>`).join("");
 
-// Países pelo nome, e as moedas deles mais as mais comuns, no idioma da tela
+// Moedas pelo nome, no idioma da tela
 function opcoesAjustes() {
-  const escolhidos = ["pais", "moedaBolsa", "moeda", "tipoHoje"].map(id => [id, $(id).value]);
-  const nomeRegiao = new Intl.DisplayNames([T.locale], { type: "region" });
+  const escolhidos = ["moedaBolsa", "moeda", "tipoHoje"].map(id => [id, $(id).value]);
   const nomeMoeda = new Intl.DisplayNames([T.locale], { type: "currency" });
-  $("pais").innerHTML = Object.keys(PAISES).map(k => [k, nomeRegiao.of(k)])
-    .sort((a, b) => a[1].localeCompare(b[1], T.locale))
-    .map(([k, n]) => `<option value="${k}">${esc(n)}</option>`).join("")
-    + `<option value="">${esc(t().nenhumPais)}</option>`;
-  const moedas = [...new Set([...Object.values(PAISES).map(p => p.moeda), "USD", "EUR", "GBP"])].sort()
-    .map(m => `<option value="${m}">${esc(nomeMoeda.of(m))} (${m})</option>`).join("");
-  $("moedaBolsa").innerHTML = `<option value="">${esc(t().doPais(""))}</option>${moedas}`;
-  $("moeda").innerHTML = `<option value="">${esc(t().igualBolsa(""))}</option>${moedas}`;
+  const moedas = ["BRL", "USD"].map(m => `<option value="${m}">${esc(nomeMoeda.of(m))} (${m})</option>`).join("");
+  $("moedaBolsa").innerHTML = moedas;
+  $("moeda").innerHTML = moedas;
   $("tipoHoje").innerHTML = opcoesTipo();
   for (const [id, valor] of escolhidos) if (valor) $(id).value = valor;
-}
-function rotularMoedas() {
-  const c = cfg();
-  poe($("moedaBolsa").options[0], t().doPais(c.cal.moeda));
-  poe($("moeda").options[0], t().igualBolsa(c.moedaBolsa));
-  descreverCambio();
 }
 
 // "1 BRL = 0,199 USD · cotação de 22/10", e de onde vem (os termos do serviço
@@ -909,10 +881,9 @@ function descreverCambio() {
 }
 
 $("btnAjustes").addEventListener("click", () => {
-  const c = { ...PADRAO, ...dados.campos, pais: cfg().pais, idioma: T.codigo,
-    moedaBolsa: dados.campos.moedaBolsa ?? "", moeda: dados.campos.moeda ?? "" };
+  const c = { ...PADRAO, ...dados.campos, idioma: T.codigo, moedaBolsa: cfg().moedaBolsa, moeda: cfg().moedaPedida };
   for (const id of CAMPOS_AJUSTES) $(id).value = c[id];
-  rotularMoedas();
+  descreverCambio();
   desenharExtras();
   $("ajustes").showModal();
   listarBackups();
@@ -920,8 +891,11 @@ $("btnAjustes").addEventListener("click", () => {
 for (const id of CAMPOS_AJUSTES) {
   $(id).addEventListener("input", () => {
     mudarCampos({ [id]: $(id).value });
-    if (id === "horasSemana" || id === "pais") registrarHoje();
-    if (id === "pais" || id === "moedaBolsa" || id === "moeda") rotularMoedas();
+    if (id === "horasSemana") registrarHoje();
+    if (id === "moedaBolsa" || id === "moeda") {
+      $("moeda").value = cfg().moedaPedida; // "Mostrar em" vazio segue a moeda da bolsa
+      descreverCambio();
+    }
     aoMudarDeFora();
     aplicarTema();
     recalcular();
@@ -947,7 +921,7 @@ function linhaExtra(e = { data: "", nome: "", tipo: "feriado" }) {
 }
 
 function desenharExtras() {
-  const lista = lerExtras(dados.campos.feriadosExtras ?? JSON.stringify(EXTRAS_DE_ANTES));
+  const lista = lerExtras(dados.campos.feriadosExtras ?? "[]");
   $("extras").innerHTML = lista.map(linhaExtra).join("");
 }
 
@@ -974,28 +948,6 @@ $("btnExtra").addEventListener("click", () => {
   $("extras").lastElementChild.querySelector("input").focus();
 });
 
-// Uma vez só: grava o país de quem já usava o app (Brasil + 13/10, como era);
-// para quem chega agora, o país vem do idioma do navegador, sem extras
-function migrarPais() {
-  const antigo = Object.keys(dados.campos).length > 0 || Object.keys(dados.registro).length > 0;
-  if (dados.campos.pais === undefined) {
-    mudarCampos(antigo ? { pais: "BR", feriadosExtras: JSON.stringify(EXTRAS_DE_ANTES) }
-      : { pais: paisDoNavegador(), feriadosExtras: "[]" });
-  }
-  // Quem já usava o app usava em português
-  if (dados.campos.idioma === undefined) mudarCampos({ idioma: antigo ? "pt" : idiomaDoNavegador() });
-}
-function paisDoNavegador() {
-  for (const idioma of navigator.languages ?? [navigator.language]) {
-    try {
-      const regiao = new Intl.Locale(idioma).maximize().region;
-      if (PAISES[regiao]) return regiao;
-    } catch {
-      // idioma que o Intl não conhece: tenta o próximo
-    }
-  }
-  return "";
-}
 
 // ------------------------------------------------------------------ backups
 
@@ -1616,7 +1568,8 @@ async function iniciar() {
   if (dados) prepararTela();
   await sincronizar(await primeiraBusca);
   if (!dados) dados = { campos: {}, camposAtualizado: 0, registro: {} };
-  migrarPais();
+  // Primeira visita: o idioma vem do navegador e fica gravado
+  if (dados.campos.idioma === undefined) mudarCampos({ idioma: idiomaDoNavegador() });
   if (cfg().idioma !== T.codigo) {
     T = await carregarIdioma(cfg().idioma);
     local.gravar("horas.idioma", T.codigo);

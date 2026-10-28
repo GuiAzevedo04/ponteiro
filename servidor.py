@@ -36,8 +36,8 @@ CAMBIO_URL = "https://open.er-api.com/v6/latest/USD"
 CAMBIO_ESPERA = 600  # sem internet, tenta de novo a cada 10 min, não a cada F5
 
 # Só isto é servido: nada de servidor.py, registro.json ou backups pela rede
-IDIOMAS = ("pt", "en", "es", "fr", "ru", "ar", "hi", "bn", "zh", "ja")
-FONTES = ("plex-sans-latin-400", "plex-sans-latin-600", "plex-sans-cyrillic-400", "plex-sans-cyrillic-600")
+IDIOMAS = ("pt", "en")
+FONTES = ("plex-sans-latin-400", "plex-sans-latin-600")
 ESTATICOS = {
     **{f"/idiomas/{i}.js": f"idiomas/{i}.js" for i in IDIOMAS},
     **{f"/fontes/{f}.woff2": f"fontes/{f}.woff2" for f in FONTES},
@@ -46,7 +46,6 @@ ESTATICOS = {
     "/app.js": "app.js",
     "/calculo.js": "calculo.js",
     "/feriados.js": "feriados.js",
-    "/feriados-tabelas.js": "feriados-tabelas.js",
     "/sw.js": "sw.js",
     "/inicio.js": "inicio.js",
     "/icone.svg": "icone.svg",

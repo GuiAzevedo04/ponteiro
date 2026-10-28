@@ -14,12 +14,11 @@
 <link rel="modulepreload" href="/idiomas/pt.js">
 <link rel="modulepreload" href="/calculo.js">
 <link rel="modulepreload" href="/feriados.js">
-<link rel="modulepreload" href="/feriados-tabelas.js">
 <script type="module" src="/app.js"></script>
 <style>
   /* IBM Plex Sans (OFL, fontes/OFL.txt): algarismos tabulares de verdade e
-     cara de instrumento, que combina com um relógio de ponto. Só latim e
-     cirílico; árabe, hindi, bengali, chinês e japonês ficam com a do sistema. */
+     cara de instrumento, que combina com um relógio de ponto. Só o latim, que
+     é o que o português e o inglês usam. */
   @font-face {
     font-family: "IBM Plex Sans";
     font-weight: 400;
@@ -33,20 +32,6 @@
     font-display: swap;
     src: url("/fontes/plex-sans-latin-600.woff2") format("woff2");
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-  }
-  @font-face {
-    font-family: "IBM Plex Sans";
-    font-weight: 400;
-    font-display: swap;
-    src: url("/fontes/plex-sans-cyrillic-400.woff2") format("woff2");
-    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-  }
-  @font-face {
-    font-family: "IBM Plex Sans";
-    font-weight: 600;
-    font-display: swap;
-    src: url("/fontes/plex-sans-cyrillic-600.woff2") format("woff2");
-    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
   }
 
   /* Tema escuro é o padrão; o claro vem por escolha nos ajustes ou pelo
@@ -164,9 +149,6 @@
      não carregar, a página aparece assim mesmo depois de um segundo e meio. */
   .traduzindo body { visibility: hidden; animation: aparecer 0s 1.5s forwards; }
   @keyframes aparecer { to { visibility: visible; } }
-  /* Linha do dia e gráficos são eixos de tempo: da esquerda para a direita
-     também em árabe, como nas planilhas */
-  .linha, .area, .escala { direction: ltr; }
   [hidden] { display: none !important; }
   html { background: var(--fundo); }
   body {
@@ -187,8 +169,6 @@
   .neg { color: var(--vermelho); }
   :focus-visible { outline: 2px solid var(--azul); outline-offset: 2px; }
   .ic { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  /* Setas de voltar e avançar viram no árabe */
-  [dir="rtl"] .espelha { transform: scaleX(-1); }
 
   .card {
     background: var(--superficie);
@@ -252,7 +232,6 @@
     background-size: 5px 5px;
     background-repeat: no-repeat;
   }
-  [dir="rtl"] select { background-position: left 12px center, left 17px center; }
   input:disabled, select:disabled { opacity: 0.45; }
   input[type=checkbox] { accent-color: var(--azul); width: 18px; height: 18px; margin: 0; }
   label { display: inline-flex; align-items: center; gap: 8px; color: var(--texto-2); font-size: 15px; }
@@ -325,7 +304,6 @@
   #tempo, .semana-dias { margin-top: auto; }
   .semana-dias { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; padding-top: 24px; border-top: 1px solid var(--borda); }
   .dia-sem { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--texto-2); min-width: 0; }
-  /* Pode quebrar: "5小时30分" ou "6 ч 00 мин" não cabem numa coluna estreita */
   .dia-sem b { font-size: 15px; color: var(--texto); font-weight: 600; font-variant-numeric: tabular-nums; }
   .dia-sem.hoje .d { color: var(--azul); font-weight: 600; }
   .dia-sem.fora b { color: var(--texto-2); font-weight: 400; }
@@ -604,7 +582,6 @@
     .tabela { max-height: 70vh; }
     /* A tabela rola de lado: o dia fica preso e a borda esmaece para mostrar que há mais */
     .tabela { mask-image: linear-gradient(to left, transparent, #000 24px); }
-    [dir="rtl"] .tabela { mask-image: linear-gradient(to right, transparent, #000 24px); }
     .tabela tbody th, .tabela thead th:first-child { position: sticky; inset-inline-start: 0; background: var(--superficie); }
     .tabela thead th:first-child { z-index: 2; }
     .tabela td.acao { padding-inline-end: 24px; }
@@ -737,11 +714,11 @@
     <div class="topo">
       <div class="mesNav">
         <button class="botao icone" id="mesAnterior" aria-label="Mês anterior" data-t-aria="mesAnterior">
-          <svg class="ic espelha" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
         </button>
         <h2 id="tituloMes"></h2>
         <button class="botao icone" id="mesSeguinte" aria-label="Próximo mês" data-t-aria="mesSeguinte">
-          <svg class="ic espelha" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
         </button>
       </div>
       <div id="resumo"></div>
@@ -812,7 +789,6 @@
     <h2 id="ajustesTitulo" data-t="ajustes">Ajustes</h2>
     <label><span data-t="horasSemana">Horas por semana</span> <input id="horasSemana" type="number" min="1" max="60" step="0.5"></label>
     <label><span data-t="bolsaMensal">Bolsa mensal</span> <input id="salario" type="number" min="0" step="0.01"></label>
-    <label><span data-t="pais">País</span> <select id="pais"></select></label>
     <label><span data-t="moedaBolsa">Moeda da bolsa</span> <select id="moedaBolsa"></select></label>
     <label><span data-t="moeda">Mostrar em</span> <select id="moeda"></select></label>
     <p class="nota" id="cambioInfo" role="status"></p>
@@ -833,7 +809,7 @@
     </label>
     <fieldset>
       <legend data-t="feriadosExtras">Feriados extras</legend>
-      <p class="nota" data-t="feriadosExtrasNota">Valem por cima dos do país: feriado da cidade, recesso, ou um dia que vira de trabalho (como as trocas de dia na China).</p>
+      <p class="nota" data-t="feriadosExtrasNota">Valem por cima dos nacionais: feriado da cidade, recesso, ou um dia que vira de trabalho.</p>
       <div class="extras" id="extras"></div>
       <div class="acoes"><button type="button" class="botao pequeno" id="btnExtra" data-t="adicionar">Adicionar</button></div>
     </fieldset>

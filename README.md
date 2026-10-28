@@ -43,74 +43,28 @@ pasta `horas` e o do Python antes de instalar.
   `pkg install python3`, rode `crontab -e` e acrescente a linha de
   `autostart/freebsd-crontab.txt`.
 
-## País, feriados e moeda
+## Feriados, moeda e idioma
 
-Em Ajustes ficam o país, as moedas e os feriados extras.
+Tudo isso fica em Ajustes.
 
-- **Países:** Brasil, Estados Unidos, México, França, Portugal, Rússia, China,
-  Japão, Egito, Índia e Bangladesh, ou nenhum (só os feriados extras). O país
-  decide os feriados, o fim de semana (sexta e sábado no Egito e em
-  Bangladesh, com a semana começando no domingo) e a moeda padrão.
-- **Moeda da bolsa e "Mostrar em":** a bolsa fica guardada na moeda em que
-  se recebe (a do país, se não escolher outra). Com "Mostrar em" diferente,
-  todos os valores aparecem convertidos pela cotação do dia. Quem busca a
-  cotação é o servidor, uma vez por dia, em `open.er-api.com` (grátis, sem
-  conta), e guarda em `cambio.json`. É a única ida do app à internet e não
-  leva nada dos seus dados. Sem internet, vale a última cotação; sem
-  cotação nenhuma, os valores ficam na moeda da bolsa. Meses passados
-  também usam a cotação de hoje.
-- **Feriados extras:** valem por cima dos do país. Servem para o feriado da
-  cidade, um recesso, um feriado que o governo mudou de dia, ou um dia que
-  vira de trabalho (como os sábados de troca na China).
-- **Datas que dependem da lua:** as islâmicas do Egito saem do calendário
-  Umm al-Qura e podem cair um dia antes ou depois da data anunciada. Nesse
-  caso, ajuste com um feriado extra.
-- **Tabelas oficiais:** os calendários que o governo publica ano a ano
-  (China e Rússia, com as trocas de dia) e as datas lunares de Índia e
-  Bangladesh ficam em `feriados-tabelas.js`, gerado pelo pacote Python
-  `holidays`. Quando a China publicar o calendário de um ano novo (em
-  novembro), gere de novo:
-
-  ```sh
-  python3 -m venv /tmp/v && /tmp/v/bin/pip install holidays
-  /tmp/v/bin/python ferramentas/tabelas_feriados.py > feriados-tabelas.js
-  /tmp/v/bin/python ferramentas/tabelas_feriados.py --referencia > testes/feriados-referencia.json
-  ```
-
-  O app não depende do pacote, só do arquivo gerado.
-
-## Idiomas
-
-Em Ajustes, o idioma da tela: português, inglês, espanhol, francês, russo,
-árabe, hindi, bengali, chinês e japonês. Quem chega pela primeira vez recebe o
-idioma do navegador.
-
-- **Datas, horários e dinheiro** seguem o idioma (5:00 PM em inglês, 17:00 em
-  português), sempre com algarismos 0-9. O que fica guardado em
-  `registro.json` não muda com o idioma.
-- **Duração do almoço:** dá para digitar no jeito de qualquer idioma, não só
-  do que está na tela: `1h30`, `1:30`, `1,5`, `1.5 hours`, `1 ч 30 мин`,
-  `1小时30分`, `1時間30分`, `1 घंटा 30 मिनट`, `১ ঘ ৩০ মি`, `١ س ٣٠ د`. Vale a
-  vírgula ou o ponto como decimal, e os algarismos de outras escritas.
-- **Árabe:** a tela é da direita para a esquerda; a linha do dia e os
-  gráficos continuam da esquerda para a direita, como nas planilhas.
-- **CSV:** com vírgula decimal, o separador é `;`; com ponto, `,`.
-- **Nomes de feriados:** cada idioma traduz os do país em que é falado; os de
-  outros países aparecem em inglês.
-- **Traduções:** feitas sem revisão de quem fala cada idioma (principalmente
-  hindi, bengali e árabe). Os textos ficam em `idiomas/*.js`, um arquivo por
-  idioma, todos com as mesmas chaves (`node --test` confere).
-
-Glossário para quem for revisar:
-
-| Termo | Sentido |
-|---|---|
-| bolsa | valor fixo pago por mês (bolsa de estudos ou salário fixo) |
-| meta | horas que o dia ou a semana deveria ter |
-| saldo | horas trabalhadas menos a meta: positivo sobra, negativo falta |
-| folga | dia sem trabalho que gasta saldo (conta na meta, sem horas) |
-| dia fechado | dia com chegada e saída registradas |
-| feriado/recesso | dia sem trabalho que sai da meta e da divisão da bolsa |
+- **Feriados:** os nacionais do Brasil, mais os feriados extras. Os extras
+  valem por cima dos nacionais: o feriado da cidade, um recesso, ou um dia
+  que vira de trabalho.
+- **Moeda da bolsa e "Mostrar em":** real ou dólar. A bolsa fica guardada na
+  moeda em que se recebe. Com "Mostrar em" diferente, todos os valores
+  aparecem convertidos pela cotação do dia. Quem busca a cotação é o
+  servidor, uma vez por dia, em `open.er-api.com` (grátis, sem conta), e
+  guarda em `cambio.json`. É a única ida do app à internet e não leva nada
+  dos seus dados. Sem internet, vale a última cotação; sem cotação nenhuma,
+  os valores ficam na moeda da bolsa. Meses passados também usam a cotação
+  de hoje.
+- **Idioma:** português ou inglês. Na primeira visita vale o do navegador.
+  Datas, horários e dinheiro seguem o idioma (5:00 PM em inglês, 17:00 em
+  português); o que fica guardado em `registro.json` não muda.
+- **Duração do almoço:** dá para digitar `1h30`, `1:30`, `1,5`, `1.5 hours`
+  ou `35 min`, nos dois idiomas.
+- **CSV:** em português, separado por `;` com vírgula decimal; em inglês, por
+  `,` com ponto.
 
 ## Cores para daltonismo
 
@@ -147,8 +101,4 @@ preso por um antivírus e a pasta que não abre para fsync.
 
 ## Fontes
 
-Latim e cirílico usam a IBM Plex Sans, que vem junto em `fontes/` (licença
-OFL em `fontes/OFL.txt`); os outros alfabetos usam as fontes do sistema. No
-FreeBSD, e em Linux mínimo, chinês, japonês, hindi, bengali e árabe precisam
-de fontes como as Noto (`pkg install noto` no FreeBSD, `noto-fonts` na maioria
-dos Linux).
+A IBM Plex Sans vem junto em `fontes/`, com a licença OFL em `fontes/OFL.txt`.
