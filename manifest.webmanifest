@@ -1,0 +1,11 @@
+{
+  "name": "Horas",
+  "short_name": "Horas",
+  "description": "Horas trabalhadas, saldo da semana e bolsa do mês",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121316",
+  "theme_color": "#121316",
+  "icons": [{ "src": "/icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

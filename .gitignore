@@ -1,0 +1,5 @@
+registro.json
+cambio.json
+backups/
+*.tmp
+__pycache__/

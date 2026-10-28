@@ -1,0 +1,247 @@
+{
+ "rotulo": "antes",
+ "app": "bench/antes",
+ "quando": "2026-10-19T13:17:53",
+ "chrome": "Google Chrome 155.0.8059.84",
+ "segundos_por_cenario_parado": 30,
+ "metricas": {
+  "carga.fria.fcp_ms": [
+   44,
+   36,
+   40,
+   36,
+   44,
+   44,
+   48
+  ],
+  "carga.fria.numeros_ms": [
+   44,
+   36,
+   40,
+   36,
+   44,
+   44,
+   48
+  ],
+  "carga.fria.kb": [
+   26.79296875,
+   27.3359375,
+   27.3359375,
+   27.3359375,
+   27.3359375,
+   27.3359375,
+   27.3359375
+  ],
+  "carga.fria.requisicoes": [
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5
+  ],
+  "carga.repetida.fcp_ms": [
+   40,
+   28,
+   40,
+   24,
+   36,
+   28,
+   24
+  ],
+  "carga.repetida.numeros_ms": [
+   40,
+   28,
+   40,
+   24,
+   36,
+   28,
+   24
+  ],
+  "carga.repetida.kb": [
+   2.3818359375,
+   2.3818359375,
+   2.3818359375,
+   2.3818359375,
+   2.3818359375,
+   2.3818359375,
+   2.3818359375
+  ],
+  "carga.repetida.requisicoes": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "a11y.contraste_baixo_dark": [
+   8
+  ],
+  "a11y.contraste_baixo_light": [
+   8
+  ],
+  "ocioso_cpu1x.cpu_ms_min": [
+   970.212,
+   999.2260000000001,
+   1064.892
+  ],
+  "ocioso_cpu1x.script_ms_min": [
+   104.83200000000001,
+   116.48999999999998,
+   123.676
+  ],
+  "ocioso_cpu1x.estilo_layout_ms_min": [
+   420.248,
+   428.11999999999995,
+   457.76399999999995
+  ],
+  "ocioso_cpu1x.recalc_estilo_min": [
+   3600.0,
+   3600.0,
+   3600.0
+  ],
+  "ocioso_cpu1x.layouts_min": [
+   3600.0,
+   3600.0,
+   3600.0
+  ],
+  "ocioso_cpu1x.heap_mb": [
+   0.818092,
+   0.817704,
+   0.817708
+  ],
+  "ocioso_cpu4x.cpu_ms_min": [
+   1680.13,
+   1636.938,
+   1715.6480000000001
+  ],
+  "ocioso_cpu4x.script_ms_min": [
+   242.648,
+   233.852,
+   285.872
+  ],
+  "ocioso_cpu4x.estilo_layout_ms_min": [
+   651.028,
+   649.602,
+   622.9699999999999
+  ],
+  "ocioso_cpu4x.recalc_estilo_min": [
+   3600.0,
+   3600.0,
+   3600.0
+  ],
+  "ocioso_cpu4x.layouts_min": [
+   3600.0,
+   3600.0,
+   3600.0
+  ],
+  "ocioso_cpu4x.heap_mb": [
+   0.817704,
+   0.817696,
+   0.817712
+  ],
+  "fundo.cpu_ms_min": [
+   34.879999999999995,
+   31.405999999999988,
+   37.224000000000004
+  ],
+  "fundo.script_ms_min": [
+   18.438,
+   16.316,
+   19.198
+  ],
+  "fundo.estilo_layout_ms_min": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "fundo.recalc_estilo_min": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "fundo.layouts_min": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "fundo.heap_mb": [
+   0.665104,
+   0.665176,
+   0.65858
+  ],
+  "historico.abrir_ms": [
+   11.900000000372529,
+   12.5,
+   13.800000000745058,
+   11.099999999627471,
+   13.099999999627471,
+   12.799999998882413,
+   13.599999999627471
+  ],
+  "historico.mudar_mes_ms": [
+   6.300000000745058,
+   6.300000000745058,
+   6.300000000745058,
+   6.400000000372529,
+   6.399999998509884,
+   6.5,
+   6.600000001490116
+  ],
+  "servidor.pagina_req_s": [
+   4383.17,
+   4428.16,
+   4413.84
+  ],
+  "servidor.pagina_falhas": [
+   0,
+   0,
+   0
+  ],
+  "servidor.dados_req_s": [
+   4896.79,
+   5243.37,
+   5182.61
+  ],
+  "servidor.dados_falhas": [
+   0,
+   0,
+   0
+  ],
+  "servidor.escritas_perdidas_de_20": [
+   19,
+   18,
+   17
+  ],
+  "servidor.escritas_com_erro_de_20": [
+   19,
+   12,
+   18
+  ]
+ },
+ "contraste_baixo": {
+  "dark": [
+   "button.x 2.96:1",
+   "div#infoMes.sub 2.96:1",
+   "div#infoSaida.sub 2.96:1",
+   "span#estado 2.96:1",
+   "span#info 2.96:1",
+   "span#pct 2.96:1",
+   "span.apagado 2.96:1",
+   "span.apagado 3.35:1"
+  ],
+  "light": [
+   "button.x 2.96:1",
+   "div#infoMes.sub 2.96:1",
+   "div#infoSaida.sub 2.96:1",
+   "span#estado 2.96:1",
+   "span#info 2.96:1",
+   "span#pct 2.96:1",
+   "span.apagado 2.96:1",
+   "span.apagado 3.35:1"
+  ]
+ }
+}

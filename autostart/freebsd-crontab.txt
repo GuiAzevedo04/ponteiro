@@ -1,0 +1,3 @@
+# FreeBSD (e outros Unix sem systemd): acrescente a linha abaixo com `crontab -e`.
+# Troque o caminho se a pasta horas não estiver em ~/horas.
+@reboot cd "$HOME/horas" && /usr/local/bin/python3 servidor.py >/dev/null 2>&1

@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>Horas</title>
+<style>
+  :root {
+    --fundo: #0b1120;
+    --card: #151e32;
+    --borda: #24304a;
+    --texto: #e2e8f0;
+    --suave: #8b98ad;
+    --apagado: #5b6880;
+    --verde: #22c55e;
+    --vermelho: #f87171;
+    --ambar: #fbbf24;
+    --azul: #60a5fa;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    font-family: system-ui, sans-serif;
+    background: radial-gradient(ellipse at top left, #16213a, var(--fundo) 60%);
+    color: var(--texto);
+    margin: 0;
+    padding: 3vh 3vw;
+    height: 100vh;
+  }
+  /* Relógio grande à esquerda, números à direita, ajustes embaixo: tudo na tela */
+  .grade {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      "relogio numeros"
+      "config  config";
+    gap: 2.5vh;
+    height: 100%;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--borda);
+    border-radius: 20px;
+    padding: 3vh 2.5vw;
+  }
+  .rotulo { color: var(--suave); font-size: clamp(12px, 1.6vh, 16px); text-transform: uppercase; letter-spacing: 2px; }
+  .num { font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .apagado { color: var(--apagado); }
+  .pos { color: var(--verde); }
+  .neg { color: var(--vermelho); }
+
+  .botao {
+    background: transparent;
+    color: var(--texto);
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .botao:hover { border-color: var(--azul); }
+  .topo { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .acoes { display: flex; gap: 8px; }
+
+  .relogio {
+    grid-area: relogio;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  #tempo { font-size: clamp(56px, 16vh, 200px); line-height: 1; margin: 2vh 0 4vh; letter-spacing: -2px; }
+  .barra { height: 14px; background: var(--fundo); border-radius: 7px; overflow: hidden; }
+  #progresso {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--azul), var(--verde));
+    border-radius: 7px;
+    transition: width 0.5s;
+  }
+  .legenda { display: flex; justify-content: space-between; margin-top: 1.5vh; color: var(--apagado); font-size: clamp(12px, 1.7vh, 16px); }
+
+  .numeros { grid-area: numeros; display: grid; grid-template-rows: repeat(3, 1fr); gap: 2.5vh; }
+  .numeros .card { display: flex; flex-direction: column; justify-content: center; border-left: 4px solid var(--cor); }
+  .numeros .big { font-size: clamp(32px, 7vh, 80px); color: var(--cor); margin-top: 0.5vh; }
+  .numeros .sub { color: var(--apagado); font-size: clamp(12px, 1.6vh, 15px); margin-top: 0.5vh; }
+
+  .config {
+    grid-area: config;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px 24px;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+  }
+  label { display: flex; align-items: center; gap: 10px; color: var(--suave); font-size: 14px; }
+  input[type=number], input[type=time] {
+    width: 110px;
+    background: var(--fundo);
+    color: var(--texto);
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 16px;
+  }
+  input:focus { outline: 2px solid var(--azul); outline-offset: 1px; }
+  input[type=checkbox] { accent-color: var(--verde); width: 18px; height: 18px; }
+
+  /* Histórico ocupa a tela toda; só a tabela rola, a página não */
+  .historico { height: 100%; display: flex; flex-direction: column; gap: 2vh; }
+  .mesNav { display: flex; align-items: center; gap: 12px; }
+  #tituloMes { font-size: 20px; min-width: 190px; text-align: center; text-transform: capitalize; }
+  #resumo { color: var(--suave); font-size: 15px; }
+  .tabela { flex: 1; overflow: auto; }
+  .tabela table { width: 100%; border-collapse: collapse; }
+  .tabela th {
+    position: sticky;
+    top: 0;
+    background: var(--card);
+    text-align: left;
+    font-weight: normal;
+    color: var(--suave);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 6px;
+  }
+  .tabela td { padding: 4px 6px; border-top: 1px solid var(--borda); white-space: nowrap; }
+  .tabela td input { width: 100px; padding: 4px 8px; font-size: 14px; }
+  .tabela tr.vazio td:first-child { color: var(--apagado); }
+  .tabela tr.hoje td:first-child { color: var(--azul); }
+  .tabela tr.semana td { background: var(--fundo); color: var(--suave); font-size: 13px; padding: 10px 8px; }
+  .semanaLinha { display: flex; justify-content: space-between; gap: 16px; }
+  .valor { color: var(--verde); font-variant-numeric: tabular-nums; }
+  .botao:disabled { opacity: 0.3; cursor: default; border-color: var(--borda); }
+  .x { background: none; border: none; color: var(--apagado); font-size: 18px; cursor: pointer; }
+  .x:hover { color: var(--vermelho); }
+  #estado { font-size: 13px; color: var(--apagado); }
+  #estado.off { color: var(--ambar); }
+
+  /* Em tela estreita vira uma coluna só, com rolagem */
+  @media (max-width: 900px) {
+    body { height: auto; padding: 16px; }
+    .grade { grid-template-columns: 1fr; grid-template-rows: none; grid-template-areas: "relogio" "numeros" "config"; }
+    .config { flex-direction: column; align-items: stretch; }
+    label { justify-content: space-between; }
+    .historico { height: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="grade" id="painel">
+<div class="card relogio">
+  <div class="topo">
+    <div class="rotulo">Tempo trabalhado hoje</div>
+    <div class="acoes">
+      <button class="botao" id="btnSaida">Registrar saída</button>
+      <button class="botao" id="btnHistorico">Histórico</button>
+    </div>
+  </div>
+  <div class="num" id="tempo">00:00:00</div>
+  <div class="barra"><div id="progresso"></div></div>
+  <div class="legenda"><span id="pct">0% da meta</span><span id="info"></span></div>
+</div>
+
+<div class="numeros">
+  <div class="card" style="--cor: var(--verde)">
+    <div class="rotulo">Dinheiro feito hoje</div>
+    <div class="big num" id="dinheiro">R$ 0,00</div>
+  </div>
+  <div class="card" style="--cor: var(--ambar)">
+    <div class="rotulo">Posso sair às</div>
+    <div class="big num" id="saida">--:--</div>
+    <div class="sub" id="infoSaida"></div>
+  </div>
+  <div class="card" style="--cor: var(--azul)">
+    <div class="rotulo">Feito no mês até agora</div>
+    <div class="big num" id="mes">R$ 0,00</div>
+    <div class="sub" id="infoMes"></div>
+  </div>
+</div>
+
+<div class="card config">
+  <label>Horas por semana <input id="horasSemana" type="number" value="30"></label>
+  <label>Bolsa mensal (R$) <input id="salario" type="number" value="3000"></label>
+  <label>Cheguei às <input id="entrada" type="time" value="08:00"></label>
+  <label><input id="temAlmoco" type="checkbox" checked> Almoço às <input id="almoco" type="time" value="12:00"></label>
+  <label>Duração (h) <input id="almocoHoras" type="number" value="1" min="0" step="0.25"></label>
+  <label><input id="temExtra" type="checkbox"> Compensar o saldo da semana</label>
+  <span id="estado"></span>
+</div>
+</div>
+
+<div class="card historico" id="historico" hidden>
+  <div class="topo">
+    <button class="botao" id="btnVoltar">← Voltar</button>
+    <div class="mesNav">
+      <button class="botao" id="mesAnterior">‹</button>
+      <span id="tituloMes"></span>
+      <button class="botao" id="mesSeguinte">›</button>
+    </div>
+    <div id="resumo"></div>
+  </div>
+  <div class="tabela">
+    <table>
+      <thead><tr><th>Dia</th><th>Chegada</th><th>Almoço</th><th>Duração (h)</th><th>Saída</th><th>Trabalhado</th><th>Valeu</th><th>R$/h</th><th></th></tr></thead>
+      <tbody id="linhas"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const ids = ["horasSemana", "salario", "entrada", "almoco", "almocoHoras", "temAlmoco", "temExtra",
+    "tempo", "progresso", "pct", "saida", "infoSaida", "dinheiro", "info", "mes", "infoMes",
+    "painel", "historico", "btnSaida", "btnHistorico", "btnVoltar", "mesAnterior", "mesSeguinte", "tituloMes", "resumo", "linhas", "estado"];
+  const el = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+  const campos = ["horasSemana", "salario", "entrada", "almoco", "almocoHoras", "temAlmoco", "temExtra"];
+  const HORA = 3600000;
+
+  const pad = n => String(n).padStart(2, "0");
+  const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const chaveDia = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const deChave = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
+  const ddmm = d => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`;
+  const brl = v => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  function fmtH(ms) {
+    const min = Math.round(Math.abs(ms) / 60000);
+    return `${Math.floor(min / 60)}h${pad(min % 60)}`;
+  }
+  const fmtSaldo = ms => (ms < 0 ? "−" : "+") + fmtH(ms);
+  const saldoHtml = ms => `<span class="${ms < 0 ? "neg" : "pos"}">${fmtSaldo(ms)}</span>`;
+
+  // Persistência: o servidor.py guarda tudo em horas/registro.json, que é a
+  // fonte da verdade. O navegador mantém uma cópia para quando o servidor
+  // estiver desligado; o que mudar nesse meio-tempo fica marcado como
+  // pendente e sobe para o arquivo na próxima vez que o servidor responder.
+  const SERVIDOR = "http://localhost:8765/dados";
+  let sincronizado = false;
+  let envio;
+
+  // Registro de cada dia: { "2026-10-06": { entrada, almoco, almocoHoras, saida, meta } }
+  let registro = {};
+  function lerRegistro() {
+    try { return JSON.parse(localStorage.getItem("registro")) || {}; } catch { return {}; }
+  }
+
+  function mostrarEstado() {
+    el.estado.textContent = sincronizado
+      ? "Salvo em horas/registro.json"
+      : "Servidor desligado: salvando só no navegador";
+    el.estado.classList.toggle("off", !sincronizado);
+  }
+
+  async function carregarDoServidor() {
+    try {
+      const dados = await (await fetch(SERVIDOR, { cache: "no-store" })).json();
+      const pendente = localStorage.getItem("pendente") || !dados.registro;
+      if (pendente) {
+        enviar();
+      } else {
+        localStorage.setItem("registro", JSON.stringify(dados.registro));
+        for (const [id, v] of Object.entries(dados.campos ?? {})) localStorage.setItem(id, v);
+      }
+      sincronizado = true;
+    } catch {
+      sincronizado = false;
+    }
+    mostrarEstado();
+  }
+
+  // Junta as mudanças de alguns instantes num envio só
+  function enviar() {
+    localStorage.setItem("pendente", "1");
+    clearTimeout(envio);
+    envio = setTimeout(async () => {
+      const valores = Object.fromEntries(campos.map(id => [id, localStorage.getItem(id)]).filter(([, v]) => v !== null));
+      try {
+        const r = await fetch(SERVIDOR, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ campos: valores, registro }),
+        });
+        sincronizado = r.ok;
+        if (r.ok) localStorage.removeItem("pendente");
+      } catch {
+        sincronizado = false;
+      }
+      mostrarEstado();
+    }, 300);
+  }
+
+  function guardarCampo(id) {
+    const c = el[id];
+    localStorage.setItem(id, c.type === "checkbox" ? c.checked : c.value);
+    enviar();
+  }
+
+  function salvarRegistro() {
+    localStorage.setItem("registro", JSON.stringify(registro));
+    enviar();
+  }
+
+  // O histórico começa no primeiro dia registrado: antes disso não há o que mostrar
+  const inicio = () => Object.keys(registro).sort()[0] ?? chaveDia(new Date());
+
+  const dadosDosCampos = () => ({
+    entrada: el.entrada.value,
+    almoco: el.temAlmoco.checked ? el.almoco.value : "",
+    almocoHoras: Number(el.almocoHoras.value),
+    meta: Number(el.horasSemana.value) / 5,
+  });
+
+  // Os campos de cima são sempre o dia de hoje; fim de semana só entra se já
+  // tiver registro (ou se a saída for registrada)
+  function registrarHoje() {
+    const hoje = chaveDia(new Date());
+    if (!registro[hoje] && !util(new Date())) return;
+    registro[hoje] = { ...registro[hoje], ...dadosDosCampos() };
+    salvarRegistro();
+  }
+
+  // Quando o dia de hoje é editado no histórico, os campos de cima acompanham
+  function aplicarNosCampos(reg) {
+    el.entrada.value = reg.entrada;
+    el.temAlmoco.checked = Boolean(reg.almoco);
+    if (reg.almoco) el.almoco.value = reg.almoco;
+    el.almocoHoras.value = reg.almocoHoras;
+    ["entrada", "almoco", "temAlmoco", "almocoHoras"].forEach(guardarCampo);
+  }
+
+  function horarioHoje(hhmm) {
+    const [h, m] = hhmm.split(":").map(Number);
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d;
+  }
+
+  // Tempo entre a chegada e `ate`, menos a parte do almoço que já passou.
+  // Só os horários importam, então qualquer dia pode usar a data de hoje.
+  function trabalhadoMs(reg, ate) {
+    const entrada = horarioHoje(reg.entrada);
+    let ms = Math.max(0, ate - entrada);
+    if (reg.almoco) {
+      const ini = horarioHoje(reg.almoco);
+      const fim = new Date(ini.getTime() + reg.almocoHoras * HORA);
+      ms -= Math.max(0, Math.min(ate, fim) - Math.max(ini, entrada));
+    }
+    return Math.max(0, ms);
+  }
+
+  // Dia fechado = tem chegada e saída; só ele entra em saldo e valor por hora
+  const fechado = reg => Boolean(reg?.entrada && reg?.saida);
+  const trabalhadoDia = reg => trabalhadoMs(reg, horarioHoje(reg.saida));
+
+  const chave = d => `${d.getMonth() + 1}-${d.getDate()}`;
+
+  // Feriados nacionais, aniversário da cidade (13/10) e os móveis que dependem
+  // da Páscoa (Carnaval e Corpus Christi são ponto facultativo, mas a
+  // universidade costuma parar)
+  function feriados(ano) {
+    const fixos = ["1-1", "4-21", "5-1", "9-7", "10-12", "10-13", "11-2", "11-15", "11-20", "12-25"];
+
+    // Domingo de Páscoa (algoritmo de Meeus)
+    const a = ano % 19, b = Math.floor(ano / 100), c = ano % 100;
+    const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const mes = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+    const dia = ((h + l - 7 * m + 114) % 31) + 1;
+
+    const moveis = [-48, -47, -2, 60].map(dias => chave(new Date(ano, mes, dia + dias)));
+    return new Set([...fixos, ...moveis]);
+  }
+
+  const feriadosPorAno = {};
+  function util(d) {
+    const fer = feriadosPorAno[d.getFullYear()] ??= feriados(d.getFullYear());
+    return d.getDay() !== 0 && d.getDay() !== 6 && !fer.has(chave(d));
+  }
+
+  function diasUteisMes(ano, mes) {
+    let n = 0;
+    for (const d = new Date(ano, mes, 1); d.getMonth() === mes; d.setDate(d.getDate() + 1)) {
+      if (util(d)) n++;
+    }
+    return n;
+  }
+
+  // A bolsa é fixa no mês, então cada dia útil vale a mesma fração dela:
+  // meses com menos dias úteis pagam mais por dia
+  const valorDiaMes = d => Number(el.salario.value) / diasUteisMes(d.getFullYear(), d.getMonth());
+
+  const segundaDa = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() - (d.getDay() + 6) % 7);
+
+  // Saldo da semana (segunda a domingo) dos dias fechados antes de `ate`
+  function semana(segunda, ate = null) {
+    let ms = 0, meta = 0;
+    for (let i = 0; i < 7; i++) {
+      const k = chaveDia(new Date(segunda.getFullYear(), segunda.getMonth(), segunda.getDate() + i));
+      if (ate && k >= ate) break;
+      const reg = registro[k];
+      if (!fechado(reg)) continue;
+      ms += trabalhadoDia(reg);
+      meta += reg.meta * HORA;
+    }
+    return { ms, meta, saldo: ms - meta };
+  }
+
+  function atualizar() {
+    const horasSemana = Number(el.horasSemana.value);
+    if (!el.entrada.value || !horasSemana) return;
+
+    const agora = new Date();
+    const hoje = chaveDia(agora);
+    const reg = dadosDosCampos();
+    const saiu = registro[hoje]?.saida;
+    const entrada = horarioHoje(reg.entrada);
+    const horasDia = horasSemana / 5;
+    // Depois de registrar a saída o relógio para nela
+    const ms = trabalhadoMs(reg, saiu ? horarioHoje(saiu) : agora);
+
+    // Saldo dos dias anteriores desta semana: falta vira tempo a mais hoje,
+    // sobra deixa sair mais cedo
+    const saldo = semana(segundaDa(agora), hoje).saldo;
+    const compensar = el.temExtra.checked ? -saldo / HORA : 0;
+
+    // Empurra a saída pelo trecho do almoço que cai dentro do expediente
+    const saidaPara = horas => {
+      let s = new Date(entrada.getTime() + Math.max(0, horas) * HORA);
+      if (reg.almoco) {
+        const ini = horarioHoje(reg.almoco);
+        const fim = new Date(ini.getTime() + reg.almocoHoras * HORA);
+        const ref = Math.max(ini, entrada);
+        if (ref < s) s = new Date(s.getTime() + Math.max(0, fim - ref));
+      }
+      return s;
+    };
+
+    // Dias passados contam como completos; hoje conta o tempo real, até a meta
+    // do dia. Compensar só repõe horas, então não rende dinheiro.
+    const diasMes = diasUteisMes(agora.getFullYear(), agora.getMonth());
+    let diasPassados = 0;
+    for (let d = 1; d < agora.getDate(); d++) {
+      if (util(new Date(agora.getFullYear(), agora.getMonth(), d))) diasPassados++;
+    }
+    const valorDia = valorDiaMes(agora);
+    const valorHora = valorDia / horasDia;
+    const ganho = util(agora) ? Math.min(1, ms / HORA / horasDia) * valorDia : 0;
+
+    const s = Math.floor(ms / 1000);
+    el.tempo.textContent = `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`;
+    const progresso = ms / HORA / horasDia;
+    el.progresso.style.width = `${Math.min(1, progresso) * 100}%`;
+    el.pct.textContent = `${Math.floor(progresso * 100)}% da meta`;
+
+    el.saida.textContent = hhmm(saidaPara(horasDia + compensar));
+    if (!saldo) el.infoSaida.textContent = "Semana em dia";
+    else if (compensar) el.infoSaida.innerHTML = `Compensando o saldo da semana (${saldoHtml(saldo)})`;
+    else el.infoSaida.innerHTML = `Saldo da semana ${saldoHtml(saldo)} · para zerar: ${hhmm(saidaPara(horasDia - saldo / HORA))}`;
+
+    el.btnSaida.textContent = saiu ? `Saí às ${saiu} · desfazer` : "Registrar saída";
+    el.dinheiro.textContent = brl(ganho);
+    el.info.textContent = `Valor da hora: ${brl(valorHora)} · meta do dia: ${horasDia.toFixed(1)}h`;
+    el.mes.textContent = brl(diasPassados * valorDia + ganho);
+    el.infoMes.textContent = `${diasMes} dias úteis no mês · ${brl(valorDia)} por dia`;
+  }
+
+  el.btnSaida.addEventListener("click", () => {
+    const agora = new Date();
+    const hoje = chaveDia(agora);
+    if (registro[hoje]?.saida) registro[hoje].saida = "";
+    else registro[hoje] = { ...registro[hoje], ...dadosDosCampos(), saida: hhmm(agora) };
+    salvarRegistro();
+  });
+
+  // Histórico: dias úteis do mês desde o primeiro registro até hoje, mais
+  // qualquer outro dia com registro, agrupados por semana
+  let mesVisto = new Date();
+
+  function inputHist(campo, tipo, valor) {
+    const extra = tipo === "number" ? ' min="0" step="0.25"' : "";
+    return `<td><input type="${tipo}" data-campo="${campo}" value="${valor ?? ""}"${extra}></td>`;
+  }
+
+  function linhaSemana(segunda) {
+    const sexta = new Date(segunda.getFullYear(), segunda.getMonth(), segunda.getDate() + 4);
+    const { ms, meta, saldo } = semana(segunda);
+    const tot = meta ? `${fmtH(ms)} de ${fmtH(meta)} · saldo ${saldoHtml(saldo)}` : '<span class="apagado">nenhum dia fechado</span>';
+    return `<tr class="semana"><td colspan="9"><div class="semanaLinha"><span>Semana de ${ddmm(segunda)} a ${ddmm(sexta)}</span><span>${tot}</span></div></td></tr>`;
+  }
+
+  function linhaDia(k, agora) {
+    const data = deChave(k);
+    const hoje = chaveDia(agora);
+    const nome = data.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" });
+    const reg = registro[k];
+    const r = reg ?? { almocoHoras: Number(el.almocoHoras.value) };
+    const valorDia = util(data) ? valorDiaMes(data) : 0;
+
+    let trab, porHora = "";
+    if (!reg) {
+      trab = '<span class="apagado">sem registro</span>';
+    } else if (fechado(reg)) {
+      const ms = trabalhadoDia(reg);
+      trab = fmtH(ms);
+      if (valorDia && ms) porHora = brl(valorDia / (ms / HORA));
+    } else if (k === hoje && reg.entrada) {
+      trab = `${fmtH(trabalhadoMs(reg, agora))} <span class="apagado">até agora</span>`;
+    } else {
+      trab = '<span class="apagado">sem saída</span>';
+    }
+    const valeu = valorDia ? `<span class="valor">${brl(valorDia)}</span>` : '<span class="apagado">—</span>';
+
+    return `<tr data-dia="${k}" class="${k === hoje ? "hoje" : reg ? "" : "vazio"}"><td>${nome}</td>`
+      + inputHist("entrada", "time", r.entrada)
+      + inputHist("almoco", "time", r.almoco)
+      + inputHist("almocoHoras", "number", r.almocoHoras)
+      + inputHist("saida", "time", r.saida)
+      + `<td>${trab}</td><td>${valeu}</td><td>${porHora}</td>`
+      + `<td>${reg ? '<button class="x" title="Apagar registro">×</button>' : ""}</td></tr>`;
+  }
+
+  function renderHistorico() {
+    const ano = mesVisto.getFullYear(), mes = mesVisto.getMonth();
+    const agora = new Date();
+    const primeiro = deChave(inicio());
+    el.tituloMes.textContent = mesVisto.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+    el.mesAnterior.disabled = mesVisto <= new Date(primeiro.getFullYear(), primeiro.getMonth(), 1);
+    el.mesSeguinte.disabled = mesVisto >= new Date(agora.getFullYear(), agora.getMonth(), 1);
+
+    const dias = new Set(Object.keys(registro).filter(k => k.startsWith(`${ano}-${pad(mes + 1)}-`)));
+    for (const d = new Date(ano, mes, 1); d.getMonth() === mes && d <= agora; d.setDate(d.getDate() + 1)) {
+      if (util(d) && d >= primeiro) dias.add(chaveDia(d));
+    }
+
+    let html = "", semanaAtual = "";
+    for (const k of [...dias].sort()) {
+      const seg = segundaDa(deChave(k));
+      if (chaveDia(seg) !== semanaAtual) {
+        semanaAtual = chaveDia(seg);
+        html += linhaSemana(seg);
+      }
+      html += linhaDia(k, agora);
+    }
+    el.linhas.innerHTML = html || '<tr><td colspan="9" class="apagado">Nada registrado neste mês.</td></tr>';
+
+    const doMes = [...dias].filter(k => util(deChave(k)));
+    const saldo = semana(segundaDa(agora), chaveDia(agora)).saldo;
+    el.resumo.innerHTML = `Esta semana: saldo ${saldoHtml(saldo)} · `
+      + `${doMes.length} dias úteis até agora valeram <span class="valor">${brl(doMes.length * valorDiaMes(mesVisto))}</span>`;
+  }
+
+  el.linhas.addEventListener("change", e => {
+    const campo = e.target.dataset.campo;
+    if (!campo) return;
+    const k = e.target.closest("tr").dataset.dia;
+    const reg = registro[k] ?? { entrada: "", almoco: "", almocoHoras: Number(el.almocoHoras.value), saida: "", meta: Number(el.horasSemana.value) / 5 };
+    reg[campo] = campo === "almocoHoras" ? Number(e.target.value) : e.target.value;
+    registro[k] = reg;
+    salvarRegistro();
+    if (k === chaveDia(new Date())) aplicarNosCampos(reg);
+    renderHistorico();
+  });
+
+  el.linhas.addEventListener("click", e => {
+    if (!e.target.classList.contains("x")) return;
+    const k = e.target.closest("tr").dataset.dia;
+    if (!confirm(`Apagar o registro de ${ddmm(deChave(k))}?`)) return;
+    delete registro[k];
+    salvarRegistro();
+    renderHistorico();
+  });
+
+  function mostrarHistorico(sim) {
+    el.painel.hidden = sim;
+    el.historico.hidden = !sim;
+    if (sim) {
+      mesVisto = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      renderHistorico();
+    }
+  }
+  el.btnHistorico.addEventListener("click", () => mostrarHistorico(true));
+  el.btnVoltar.addEventListener("click", () => mostrarHistorico(false));
+  el.mesAnterior.addEventListener("click", () => { mesVisto.setMonth(mesVisto.getMonth() - 1); renderHistorico(); });
+  el.mesSeguinte.addEventListener("click", () => { mesVisto.setMonth(mesVisto.getMonth() + 1); renderHistorico(); });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !el.historico.hidden) mostrarHistorico(false);
+  });
+
+  // O "até agora" de hoje no histórico se atualiza sozinho, menos durante uma edição
+  setInterval(() => {
+    if (!el.historico.hidden && !el.linhas.contains(document.activeElement)) renderHistorico();
+  }, 30000);
+
+  async function iniciar() {
+    await carregarDoServidor();
+    registro = lerRegistro();
+
+    // Os valores ficam guardados para não precisar digitar de novo a cada dia
+    for (const id of campos) {
+      const salvo = localStorage.getItem(id);
+      if (salvo !== null) {
+        if (el[id].type === "checkbox") el[id].checked = salvo === "true";
+        else el[id].value = salvo;
+      }
+      el[id].addEventListener("input", () => {
+        guardarCampo(id);
+        registrarHoje();
+      });
+    }
+
+    registrarHoje();
+    setInterval(atualizar, 100);
+    atualizar();
+  }
+  iniciar();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Linux (systemd do usuário). Instalar:
+#   cp autostart/horas.service ~/.config/systemd/user/
+#   systemctl --user enable --now horas.service
+# Troque o caminho abaixo se a pasta horas não estiver em ~/Documentos/horas.
+[Unit]
+Description=Servidor da página de horas
+
+[Service]
+ExecStart=/usr/bin/env python3 %h/Documentos/horas/servidor.py
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
