@@ -3,11 +3,12 @@
 
 Cada versão roda com o próprio servidor.py, numa porta só dela e sobre dados
 fictícios gerados aqui: o registro.json de verdade nunca é lido nem gravado.
+Para comparar, meça antes de mudar e depois (ou outra pasta com --app):
 
-  python3 bench/medir.py --rotulo antes --app bench/antes
+  python3 bench/medir.py --rotulo antes
   python3 bench/medir.py --rotulo depois
   python3 bench/medir.py --comparar antes depois
-  python3 bench/medir.py --servir bench/antes   # cópia no ar para o Lighthouse
+  python3 bench/medir.py --servir .   # cópia no ar para o Lighthouse
 """
 import argparse
 import contextlib
@@ -188,16 +189,8 @@ def servir(app, dados):
         for f in app.iterdir():
             if f.is_file() and not f.name.startswith("registro"):
                 shutil.copy(f, tmp)
-        # Os textos de cada idioma ficam numa pasta à parte (desde a versão com idiomas)
-        if (app / "idiomas").is_dir():
-            shutil.copytree(app / "idiomas", tmp / "idiomas")
-        if (app / "fontes").is_dir():
-            shutil.copytree(app / "fontes", tmp / "fontes")
-        # A versão original tinha porta e URL fixas no código
-        for nome, velho, novo in [("servidor.py", "PORTA = 8765", f"PORTA = {PORTA}"),
-                                  ("index.html", "localhost:8765", f"localhost:{PORTA}")]:
-            f = tmp / nome
-            f.write_text(f.read_text(encoding="utf-8").replace(velho, novo), encoding="utf-8")
+        shutil.copytree(app / "idiomas", tmp / "idiomas")
+        shutil.copytree(app / "fontes", tmp / "fontes")
         (tmp / "registro.json").write_text(json.dumps(dados), encoding="utf-8")
 
         proc = subprocess.Popen([PYTHON, "servidor.py"], cwd=tmp, env={**os.environ, "HORAS_PORTA": str(PORTA)},
@@ -311,10 +304,8 @@ def contraste(c, s):
     for tema in ("dark", "light"):
         c.cmd("Emulation.setEmulatedMedia", s, features=[{"name": "prefers-color-scheme", "value": tema}])
         ruins = set()
-        # A versão original volta para a tela principal pelo btnVoltar
-        for botoes in (("btnHoje", "btnVoltar"), ("btnHistorico",), ("btnEstatisticas",)):
-            achar = " || ".join(f"document.getElementById('{b}')" for b in botoes)
-            valor(c, s, f"({achar})?.click()")
+        for botao in ("btnHoje", "btnHistorico", "btnEstatisticas"):
+            valor(c, s, f"document.getElementById('{botao}').click()")
             ruins |= set(valor(c, s, CHECA_CONTRASTE))
         achados[tema] = sorted(ruins)
     c.cmd("Emulation.setEmulatedMedia", s, features=[])
@@ -424,9 +415,8 @@ def ab(url):
 def escritas_concorrentes(base, n=20):
     """n clientes gravam, ao mesmo tempo, cada um um dia diferente.
 
-    Cada cliente segue o protocolo da sua versão: a original só faz PUT; a nova
-    manda If-Match e, num 409, junta o próprio dia ao documento atual e tenta
-    de novo (o que o app.js faz). Conta quantos dias sobreviveram.
+    Cada cliente manda If-Match e, num 409, junta o próprio dia ao documento
+    atual e tenta de novo (o que o app.js faz). Conta quantos dias sobreviveram.
     """
     url = base + "dados"
     barreira = threading.Barrier(n)
