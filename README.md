@@ -5,9 +5,9 @@ mês, num relance.** Horas é um controle de ponto pessoal para quem tem meta de
 horas por semana e uma bolsa ou salário mensal. Roda no seu computador, sem
 conta, sem nuvem e sem anúncio.
 
-![Tela Hoje no tema escuro: relógio do dia em 06:00:41, linha do tempo com chegada, almoço e agora, "Posso sair às 15:00", dinheiro feito hoje e no mês, e a semana dia a dia](.github/tela-hoje.png)
+![Tela Hoje no tema escuro: 11:52:42 trabalhadas, chegada às 03:00, "Posso sair às 05:00", R$ 50.000.000,00 feitos hoje e R$ 900.000.000,00 no mês](.github/tela-hoje.png)
 
-<sub>Captura com dados fictícios.</sub>
+<sub>Dados fictícios e exagerados de propósito: ninguém chega às 3 da manhã nem ganha R$ 50 milhões por dia. Ainda.</sub>
 
 ## O que faz
 
@@ -38,6 +38,20 @@ conta, sem nuvem e sem anúncio.
 - **Funciona sem o servidor.** A página abre mesmo com o servidor desligado e
   guarda tudo no navegador. Quando o servidor volta, os dados sobem sozinhos.
   Dá para instalar como aplicativo pelo Chrome.
+
+## Telas
+
+**Histórico**: cada dia editável, com o tipo, o almoço, o valor do dia e o saldo de cada semana.
+
+![Histórico no tema claro: dias de outubro com chegada, almoço, saída, horas trabalhadas, valor do dia e valor da hora, semanas de férias no meio](.github/tela-historico.png)
+
+**Estatísticas**: médias do período, horas por semana contra a meta, saldo acumulado e o expediente dia a dia.
+
+![Estatísticas no tema escuro: média de 19h40 por dia, chegada média 03:28, saída média 23:23, saldo de +724h00 e gráficos de barras e de linha](.github/tela-estatisticas.png)
+
+**Ajustes**: meta da semana, bolsa, moedas, idioma, tema, cores para daltonismo, feriados extras e backups.
+
+![Ajustes no tema escuro: 10 horas por semana, bolsa de 1000000000, real brasileiro, feriados extras como Dia da Mentira e a lista de backups](.github/tela-ajustes.png)
 
 ## Seus dados ficam com você
 
