@@ -114,8 +114,6 @@ python3 -m unittest discover -s testes      # servidor (no Windows: py -m unitte
 Os testes do servidor também simulam o Windows: o tipo do `.js`, o arquivo
 preso por um antivírus e a pasta que não abre para fsync.
 
-`bench/medir.py`, que mede o desempenho num Chrome headless, só roda no Linux.
-
 ## Fontes
 
 A IBM Plex Sans vem junto em `fontes/`, com a licença OFL em `fontes/OFL.txt`.
