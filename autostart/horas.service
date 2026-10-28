@@ -6,7 +6,7 @@
 Description=Servidor da página de horas
 
 [Service]
-ExecStart=/usr/bin/env python3 %h/Documentos/horas/servidor.py
+ExecStart=/usr/bin/python3 %h/Documentos/horas/servidor.py
 Restart=on-failure
 
 [Install]
