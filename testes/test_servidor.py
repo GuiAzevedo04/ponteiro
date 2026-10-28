@@ -155,6 +155,18 @@ class ServidorTest(unittest.TestCase):
         status, _, _ = self.pedir("PUT", "/dados", INICIAL, If_Match='"3"', Content_Type="text/plain")
         self.assertEqual(status, 415)
 
+    def test_content_length_invalido(self):
+        for valor in ("abc", "-1"):
+            con = http.client.HTTPConnection("127.0.0.1", self.porta, timeout=5)
+            con.putrequest("PUT", "/dados", skip_host=True)
+            for nome, v in (("Host", f"localhost:{self.porta}"), ("Content-Type", "application/json"),
+                            ("If-Match", '"3"'), ("Content-Length", valor)):
+                con.putheader(nome, v)
+            con.endheaders()
+            self.assertEqual(con.getresponse().status, 400, valor)
+            con.close()
+        self.assertEqual(self.no_disco(), INICIAL)
+
     def test_gravacoes_simultaneas_nao_se_perdem(self):
         """20 clientes gravam ao mesmo tempo; com If-Match + nova tentativa, todos sobrevivem."""
         n = 20

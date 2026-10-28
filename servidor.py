@@ -279,7 +279,13 @@ class Handler(SimpleHTTPRequestHandler):
             return self.send_error(404)
         if self.headers.get_content_type() != "application/json":
             return self.send_error(415, "Esperava application/json")
-        tamanho = int(self.headers.get("Content-Length", 0))
+        try:
+            tamanho = int(self.headers.get("Content-Length", 0))
+        except ValueError:
+            tamanho = -1
+        # Negativo faria o read esperar até a conexão fechar
+        if tamanho < 0:
+            return self.send_error(400, "Content-Length inválido")
         if tamanho > LIMITE_CORPO:
             return self.send_error(413)
         try:
