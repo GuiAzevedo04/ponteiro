@@ -6,8 +6,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import * as C from "../calculo.js";
-import { pascoa } from "../feriados.js";
+import * as C from "../pagina/calculo.js";
+import { pascoa } from "../pagina/feriados.js";
 
 // Compara como JSON, como a versão que rodava no Chrome: -0 e 0 são iguais
 const json = v => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
@@ -363,7 +363,7 @@ test("histórico, semanas e estatísticas dão o mesmo saldo", () => {
 // O app.js só roda no navegador, mas um erro de sintaxe dá para pegar aqui
 for (const arquivo of ["app.js", "graficos.js", "sw.js"]) {
   test(`${arquivo} não tem erro de sintaxe`, () => {
-    const caminho = fileURLToPath(new URL(`../${arquivo}`, import.meta.url));
+    const caminho = fileURLToPath(new URL(`../pagina/${arquivo}`, import.meta.url));
     const r = spawnSync(process.execPath, ["--check", caminho], { encoding: "utf8" });
     assert.equal(r.status, 0, r.stderr);
   });

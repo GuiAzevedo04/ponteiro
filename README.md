@@ -21,21 +21,30 @@ nesta pasta. Nada sai do computador.
 Depois é só abrir http://localhost:8765. Para usar outra porta, defina
 `HORAS_PORTA` antes de rodar.
 
+## Pastas
+
+- `pagina/`: tudo o que o navegador carrega (HTML, CSS, JavaScript, textos,
+  fontes e ícone).
+- `servidor.py`: o servidor; fica fora de `pagina/` e nunca é entregue.
+- `testes/`: testes da página e do servidor.
+- `autostart/`: arquivos para iniciar o servidor junto com o sistema.
+
 ## Onde mudar o quê
 
 | Para mudar | Arquivo |
 |---|---|
-| Textos da tela | `idiomas/pt.js` e `idiomas/en.js` (as mesmas chaves nos dois) |
-| Cores, tamanhos e espaços | `estilo.css` (as cores ficam no começo, em `:root`) |
-| Feriados nacionais | `feriados.js` (os da cidade vão em Ajustes) |
-| Contas: saldo, bolsa, hora de sair | `calculo.js`, com testes em `testes/` |
-| Telas e botões | `index.html` (o que aparece) e `app.js` (o que faz) |
-| Gráficos das estatísticas | `graficos.js` |
+| Textos da tela | `pagina/idiomas/pt.js` e `pagina/idiomas/en.js` (as mesmas chaves nos dois) |
+| Cores, tamanhos e espaços | `pagina/estilo.css` (as cores ficam no começo, em `:root`) |
+| Feriados nacionais | `pagina/feriados.js` (os da cidade vão em Ajustes) |
+| Contas: saldo, bolsa, hora de sair | `pagina/calculo.js`, com testes em `testes/` |
+| Telas e botões | `pagina/index.html` (o que aparece) e `pagina/app.js` (o que faz) |
+| Gráficos das estatísticas | `pagina/graficos.js` |
 | Seus dados | `registro.json`; prefira mudar pela página |
 
 O servidor só entrega os arquivos da lista `ESTATICOS` em `servidor.py`, e a
-página só abre sem servidor com os da lista `ARQUIVOS` em `sw.js`: um arquivo
-novo entra nas duas. Depois de mudar o `servidor.py`, rode
+página só abre sem servidor com os da lista `ARQUIVOS` em `pagina/sw.js`: um
+arquivo novo entra nas duas. As listas usam o endereço do navegador, sem o
+`pagina/` (`/app.js` é `pagina/app.js`). Depois de mudar o `servidor.py`, rode
 `systemctl --user restart horas.service`.
 
 ## Iniciar junto com o sistema
@@ -116,4 +125,5 @@ preso por um antivírus e a pasta que não abre para fsync.
 
 ## Fontes
 
-A IBM Plex Sans vem junto em `fontes/`, com a licença OFL em `fontes/OFL.txt`.
+A IBM Plex Sans vem junto em `pagina/fontes/`, com a licença OFL em
+`pagina/fontes/OFL.txt`.

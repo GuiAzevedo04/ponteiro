@@ -5,11 +5,11 @@ process.env.TZ = "America/Sao_Paulo";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import * as C from "../calculo.js";
-import pt from "../idiomas/pt.js";
+import * as C from "../pagina/calculo.js";
+import pt from "../pagina/idiomas/pt.js";
 
 const CODIGOS = ["pt", "en"];
-const IDIOMAS = Object.fromEntries(await Promise.all(CODIGOS.map(async c => [c, (await import(`../idiomas/${c}.js`)).default])));
+const IDIOMAS = Object.fromEntries(await Promise.all(CODIGOS.map(async c => [c, (await import(`../pagina/idiomas/${c}.js`)).default])));
 
 // Argumentos de exemplo para os textos que são função
 const EXEMPLOS = [[], ["X"], ["X", "Y"], ["X", "Y", "Z"], ["X", "Y", "Z", 3]];
@@ -93,7 +93,7 @@ test("horário e data no jeito de cada idioma", () => {
 });
 
 test("todo texto do index.html tem chave", () => {
-  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../pagina/index.html", import.meta.url), "utf8");
   const corpo = html.slice(html.indexOf("<body>"));
   for (const [, chave] of corpo.matchAll(/data-t(?:-aria|-title|-placeholder)?="([^"]+)"/g)) {
     assert.ok(chave in pt.t, `chave ${chave} não existe em pt.js`);

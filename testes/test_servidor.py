@@ -32,8 +32,9 @@ class ServidorTest(unittest.TestCase):
         self.urlopen = self.internet.start()
         self.addCleanup(self.internet.stop)
         self.pasta = Path(tempfile.mkdtemp())
-        for nome in ("index.html", "estilo.css", "app.js", "feriados.js", "servidor.py", "fontes/plex-sans-latin-400.woff2"):
-            (self.pasta / nome).parent.mkdir(exist_ok=True)
+        for nome in ("pagina/index.html", "pagina/estilo.css", "pagina/app.js", "pagina/feriados.js", "servidor.py",
+                     "pagina/fontes/plex-sans-latin-400.woff2"):
+            (self.pasta / nome).parent.mkdir(parents=True, exist_ok=True)
             (self.pasta / nome).write_text(f"conteúdo de {nome}", encoding="utf-8")
         (self.pasta / "registro.json").write_text(json.dumps(INICIAL), encoding="utf-8")
         self.srv = servidor.Servidor(self.pasta, 0)

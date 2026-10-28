@@ -3,8 +3,8 @@ process.env.TZ = "America/Sao_Paulo";
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import * as F from "../feriados.js";
-import * as C from "../calculo.js";
+import * as F from "../pagina/feriados.js";
+import * as C from "../pagina/calculo.js";
 
 const d = C.deChave;
 const datas = ano => [...F.feriadosDoAno(ano).keys()].sort();

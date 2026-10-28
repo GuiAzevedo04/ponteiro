@@ -203,7 +203,7 @@ class Servidor(ThreadingHTTPServer):
 
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, request, endereco, servidor):
-        super().__init__(request, endereco, servidor, directory=servidor.pasta)
+        super().__init__(request, endereco, servidor, directory=servidor.pasta / "pagina")
 
     def guess_type(self, path):
         return TIPOS.get(Path(path).suffix, "application/octet-stream")
