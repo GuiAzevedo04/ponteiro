@@ -21,6 +21,23 @@ nesta pasta. Nada sai do computador.
 Depois é só abrir http://localhost:8765. Para usar outra porta, defina
 `HORAS_PORTA` antes de rodar.
 
+## Onde mudar o quê
+
+| Para mudar | Arquivo |
+|---|---|
+| Textos da tela | `idiomas/pt.js` e `idiomas/en.js` (as mesmas chaves nos dois) |
+| Cores, tamanhos e espaços | `estilo.css` (as cores ficam no começo, em `:root`) |
+| Feriados nacionais | `feriados.js` (os da cidade vão em Ajustes) |
+| Contas: saldo, bolsa, hora de sair | `calculo.js`, com testes em `testes/` |
+| Telas e botões | `index.html` (o que aparece) e `app.js` (o que faz) |
+| Gráficos das estatísticas | `graficos.js` |
+| Seus dados | `registro.json`; prefira mudar pela página |
+
+O servidor só entrega os arquivos da lista `ESTATICOS` em `servidor.py`, e a
+página só abre sem servidor com os da lista `ARQUIVOS` em `sw.js`: um arquivo
+novo entra nas duas. Depois de mudar o `servidor.py`, rode
+`systemctl --user restart horas.service`.
+
 ## Iniciar junto com o sistema
 
 Os arquivos prontos ficam em `autostart/`. Em todos, confira o caminho da
