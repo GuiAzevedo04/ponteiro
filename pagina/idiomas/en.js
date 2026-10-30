@@ -119,6 +119,7 @@ export default {
     saidaAntesChegada: "departure before arrival",
     ateAgora: "so far",
     semSaida: "no departure",
+    semChegada: "no arrival",
     nadaNoMes: "Nothing recorded this month.",
     resumoMes: (feito, meta, saldo) => `This month: ${feito} of ${meta} (${saldo})`,
     resumoValeram: (n, valor) => `${n} working day${n === 1 ? "" : "s"} so far earned ${valor}`,

@@ -1075,7 +1075,7 @@ function linhaDia({ k, reg, feriado }, hoje, agora, c) {
     if (vDia && ms) porHora = grana(vDia / (ms / HORA));
   } else if (k === hoje && reg.entrada) {
     trab = `<span class="ate-agora">${H(trabalhadoMs(reg, desdeMeiaNoite(agora)))}</span> <span class="apagado">${esc(t().ateAgora)}</span>`;
-  } else trab = `<span class="apagado">${esc(t().semSaida)}</span>`;
+  } else trab = `<span class="apagado">${esc(reg.entrada ? t().semSaida : t().semChegada)}</span>`;
   const valeu = vDia && !futuro ? `<span class="num">${grana(vDia)}</span>` : '<span class="apagado">—</span>';
   // Horários só fazem sentido em dia de trabalho que já chegou
   const bloqueado = futuro || !trabalho;

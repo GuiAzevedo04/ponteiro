@@ -122,6 +122,7 @@ export default {
     saidaAntesChegada: "saída antes da chegada",
     ateAgora: "até agora",
     semSaida: "sem saída",
+    semChegada: "sem chegada",
     nadaNoMes: "Nada registrado neste mês.",
     resumoMes: (feito, meta, saldo) => `No mês: ${feito} de ${meta} (${saldo})`,
     resumoValeram: (n, valor) => `${n} dias úteis até hoje valeram ${valor}`,
