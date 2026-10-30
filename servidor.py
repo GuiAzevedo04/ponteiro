@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Serve a página de horas em http://localhost:8765 e guarda os dados em dados/registro.json.
 
-Só usa a biblioteca padrão (Python 3.8 ou mais novo) e roda em Linux, macOS,
-FreeBSD e Windows. Rodar com: python3 servidor.py (no Windows: py servidor.py)
+Só usa a biblioteca padrão (Python 3.8 ou mais novo). Rodar com: python3 servidor.py
 HORAS_PORTA troca a porta (o bench usa isso para rodar uma cópia ao lado).
 """
 import sys
@@ -54,8 +53,8 @@ ESTATICOS = {
     "/manifest.webmanifest": "manifest.webmanifest",
 }
 
-# Tipo fixo por extensão: no Windows o mimetypes lê o registro do sistema, que
-# pode dizer text/plain para .js, e com nosniff o navegador recusa o módulo
+# Tipo fixo por extensão: o mimetypes aceita o que o sistema disser, e com
+# nosniff o navegador recusa um módulo com o tipo errado
 TIPOS = {
     ".html": "text/html; charset=utf-8",
     ".css": "text/css; charset=utf-8",
@@ -90,18 +89,6 @@ def buscar_cambio(url=CAMBIO_URL):
         }
     except (OSError, ValueError, KeyError, TypeError, AttributeError, OverflowError):
         return None
-
-
-def trocar(origem, destino, tentativas=10):
-    """os.replace que insiste um pouco: no Windows, um antivírus ou o indexador
-    segurando o arquivo por um instante faz a troca falhar com PermissionError."""
-    for i in range(tentativas):
-        try:
-            return os.replace(origem, destino)
-        except PermissionError:
-            if i == tentativas - 1:
-                raise
-            time.sleep(0.05 * (i + 1))
 
 
 class Servidor(ThreadingHTTPServer):
@@ -161,7 +148,7 @@ class Servidor(ThreadingHTTPServer):
                     try:
                         with os.fdopen(fd, "w", encoding="utf-8") as f:
                             json.dump(novo, f)
-                        trocar(tmp, self.arquivo_cambio)
+                        os.replace(tmp, self.arquivo_cambio)
                     except OSError:
                         Path(tmp).unlink(missing_ok=True)
                     atual = novo
@@ -177,18 +164,16 @@ class Servidor(ThreadingHTTPServer):
                 json.dump(dados, f, ensure_ascii=False, indent=2)
                 f.flush()
                 os.fsync(f.fileno())
-            trocar(tmp, self.arquivo)
+            os.replace(tmp, self.arquivo)
         except BaseException:
             Path(tmp).unlink(missing_ok=True)
             raise
-        # Garante a troca no disco. O Windows não abre pasta assim (e o NTFS já
-        # registra a troca no próprio journal)
-        if os.name != "nt":
-            pasta = os.open(self.dados, os.O_RDONLY)
-            try:
-                os.fsync(pasta)
-            finally:
-                os.close(pasta)
+        # Garante a troca no disco
+        pasta = os.open(self.dados, os.O_RDONLY)
+        try:
+            os.fsync(pasta)
+        finally:
+            os.close(pasta)
 
     def guardar_backup_do_dia(self):
         """Antes da primeira gravação de cada dia, guarda o arquivo como estava."""
@@ -328,7 +313,5 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     servidor = Servidor()
-    # Com pythonw (Windows, sem janela) não existe saída para escrever
-    if sys.stdout:
-        print(f"Horas em http://localhost:{PORTA} · dados em {servidor.arquivo}", flush=True)
+    print(f"Horas em http://localhost:{PORTA} · dados em {servidor.arquivo}", flush=True)
     servidor.serve_forever()

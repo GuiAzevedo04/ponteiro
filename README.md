@@ -87,9 +87,6 @@ conta, sem nuvem e sem anúncio.
 | Python | 3.12 |
 | Navegador | Google Chrome 156, também sem janela (headless) |
 
-A pasta `autostart/` também traz arquivos para macOS, Windows e FreeBSD, mas
-eles não foram testados.
-
 ## Instalar no Linux
 
 Precisa de `git`, `python3` e um navegador atual.
