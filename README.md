@@ -21,7 +21,8 @@ conta, sem nuvem e sem anúncio.
 - **Saldo da semana e do mês.** Mostra quanto falta para a meta da semana, por
   dia, e como o mês fecha se você mantiver o ritmo.
 - **Histórico.** Todos os dias, editáveis, cada um marcado como trabalho,
-  folga, férias, atestado ou feriado. Exporta para CSV.
+  folga, férias, atestado ou feriado. Exporta o mês para CSV, só para ler: o
+  backup completo é o arquivo de Ajustes.
 - **Estatísticas.** Horas por semana contra a meta, saldo acumulado e o
   expediente dia a dia, em 4, 12 ou 26 semanas ou tudo. Cada gráfico tem uma
   versão em tabela.
@@ -61,6 +62,11 @@ conta, sem nuvem e sem anúncio.
 - Antes da primeira gravação de cada dia, o servidor faz um backup. As cópias
   do último ano ficam em `dados/backups/`, e dá para voltar a qualquer dia
   pelos Ajustes.
+- Em Ajustes, **Exportar tudo** baixa um arquivo `.json` com o registro e os
+  ajustes, para levar a outra máquina ou guardar uma cópia. **Importar** lê
+  esse arquivo (ou um backup) e deixa escolher: substituir tudo, ou juntar,
+  e vale o que foi editado por último. A importação dá 15 segundos para
+  desfazer, então exporte antes.
 - A única ida à internet é a cotação do dólar, uma vez por dia, em
   `open.er-api.com`. Ela não leva nenhum dado seu.
 - Nada para instalar além do Python: o servidor usa só a biblioteca padrão.
