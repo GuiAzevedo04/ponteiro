@@ -5,7 +5,7 @@ import {
   fmtSaldo, emMs, msParaHhmm, fmtHora, fmtDiaMes, fmtData, feriadoNacional, TIPOS, vivo, tipoDe, util, diasUteisMes,
   valorDia, trabalhadoMs, fechado, trabalhadoDia,
   saidaAntes, semana, saidaPara, inicio, diasDoMes, mesclar, linhasDoMes, totaisDoMes, csvDoMes, semanasAte,
-  diasFechados, resumoPeriodo, lerDuracao, fmtDuracao, ritmoSemana, projecaoMes, restaurar, taxaCambio, esc,
+  diasFechados, resumoPeriodo, lerDuracao, fmtDuracao, ritmoSemana, projecaoMes, restaurar, taxaCambio, esc, bolsaDoMes, fecharBolsa,
 } from "./calculo.js";
 import { calendario } from "./feriados.js";
 import { desenharGraficos, esconderDica } from "./graficos.js";
@@ -169,6 +169,7 @@ function cfg() {
   const moedaBolsa = c.moedaBolsa || "BRL";
   const moedaPedida = c.moeda || moedaBolsa;
   const taxa = taxaCambio(cambio, moedaBolsa, moedaPedida);
+  const salario = Number(c.salario) || 0;
   return {
     cal, moedaBolsa, moedaPedida,
     idioma: c.idioma ?? local.ler("horas.idioma") ?? "pt",
@@ -176,7 +177,7 @@ function cfg() {
     taxa: taxa ?? 1,
     metaDia: (Number(c.horasSemana) || 0) / 5,
     horasSemana: Number(c.horasSemana) || 0,
-    salario: Number(c.salario) || 0,
+    bolsa: d => bolsaDoMes(c.bolsasAte, d, salario),
     entrada: c.entrada,
     almoco: c.almoco,
     almocoHoras: Number(c.almocoHoras) || 0,
@@ -538,7 +539,7 @@ function recalcular() {
   const saldoComHoje = fechouHoje
     ? semana(inicioDaSemana(agora), dados.registro, horasDia, chaveDia(somaDias(agora, 1))).saldo : null;
   const compensar = c.temExtra ? -saldo / HORA : 0;
-  const vDia = valorDia(agora, c.salario, dados.registro, cal);
+  const vDia = valorDia(agora, c.bolsa(agora), dados.registro, cal);
   let diasPassados = 0;
   for (let d = new Date(agora.getFullYear(), agora.getMonth(), 1); d.getDate() < agora.getDate(); d = somaDias(d, 1)) {
     if (util(d, dados.registro, cal)) diasPassados++;
@@ -890,7 +891,11 @@ $("btnAjustes").addEventListener("click", () => {
 });
 for (const id of CAMPOS_AJUSTES) {
   $(id).addEventListener("input", () => {
-    mudarCampos({ [id]: $(id).value });
+    const mudancas = { [id]: $(id).value };
+    if (id === "salario" && dados.campos.salario != null) {
+      mudancas.bolsasAte = fecharBolsa(dados.campos.bolsasAte, dados.campos.salario, new Date());
+    }
+    mudarCampos(mudancas);
     if (id === "horasSemana") registrarHoje();
     if (id === "moedaBolsa" || id === "moeda") {
       $("moeda").value = cfg().moedaPedida; // "Mostrar em" vazio segue a moeda da bolsa
@@ -1054,7 +1059,7 @@ function linhaDia({ k, reg, feriado }, hoje, agora, c) {
   const tipo = tipoDe(reg);
   const r = reg ?? { almocoHoras: c.almocoHoras };
   const trabalho = tipo === "trabalho";
-  const vDia = util(data, dados.registro, c.cal) ? valorDia(data, c.salario, dados.registro, c.cal) : 0;
+  const vDia = util(data, dados.registro, c.cal) ? valorDia(data, c.bolsa(data), dados.registro, c.cal) : 0;
   let trab = "";
   let porHora = "";
   if (!trabalho) trab = '<span class="apagado">—</span>';
@@ -1125,7 +1130,7 @@ function renderHistorico() {
   }
   const partes = [
     t().resumoMes(H(tot.trabalhado), H(tot.meta), saldoHtml(tot.saldo)),
-    t().resumoValeram(uteis, `<span class="num">${grana(uteis * valorDia(mesVisto, c.salario, dados.registro, cal))}</span>`),
+    t().resumoValeram(uteis, `<span class="num">${grana(uteis * valorDia(mesVisto, c.bolsa(mesVisto), dados.registro, cal))}</span>`),
   ];
   if (ano === agora.getFullYear() && mes === agora.getMonth()) {
     partes.push(t().resumoSemana(saldoHtml(saldo)));
@@ -1217,7 +1222,7 @@ function montarRelatorio() {
   const outros = Object.entries(tot.porTipo).map(([tipo, n]) => x.relTipo(nomeTipo(tipo), n));
   $("relatorio").innerHTML = `
     <h1>${esc(x.relTitulo(titulo))}</h1>
-    <p class="cab">${c.nome ? `${esc(c.nome)} · ` : ""}${esc(x.relCab(c.horasSemana, dinheiro(c.salario * c.taxa, c.moeda, T.locale)))}</p>
+    <p class="cab">${c.nome ? `${esc(c.nome)} · ` : ""}${esc(x.relCab(c.horasSemana, dinheiro(c.bolsa(mesVisto) * c.taxa, c.moeda, T.locale)))}</p>
     <table>
       <thead><tr>${x.relColunas.map(n => `<th>${esc(n)}</th>`).join("")}</tr></thead>
       <tbody>${corpo}</tbody>
@@ -1268,7 +1273,7 @@ function renderEstatisticas() {
   poe($("periodoNota"), periodo > desdeInicio ? t().registrosComecam(dm(primeiro)) : "");
   const semanas = semanasAte(agora, n, dados.registro, metaPadrao);
   const de = chaveDia(semanas[0].segunda);
-  const r = resumoPeriodo(dados.registro, de, agora, c.salario, metaPadrao, cal);
+  const r = resumoPeriodo(dados.registro, de, agora, c.bolsa, metaPadrao, cal);
 
   const x = t();
   const kpi = (rotulo, valor, sub) => `<div class="card kpi"><span class="rotulo">${rotulo}</span><strong>${valor}</strong><span>${sub}</span></div>`;

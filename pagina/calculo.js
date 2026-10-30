@@ -165,6 +165,22 @@ export function diasUteisMes(ano, mes, registro = {}, cal = CAL_PADRAO) {
 export const valorDia = (d, salario, registro = {}, cal = CAL_PADRAO) =>
   salario / (diasUteisMes(d.getFullYear(), d.getMonth(), registro, cal) || 1);
 
+// A bolsa vale do mês em que foi ajustada em diante. `bolsasAte` guarda as
+// antigas: { "AAAA-MM": valor até esse mês }. Mês depois da última entrada: a atual
+const chaveMes = d => chaveDia(d).slice(0, 7);
+export function bolsaDoMes(bolsasAte, d, atual) {
+  const mes = chaveMes(d);
+  const k = Object.keys(bolsasAte ?? {}).filter(m => m >= mes).sort()[0];
+  return k ? Number(bolsasAte[k]) || 0 : atual;
+}
+
+// Ajustar a bolsa encerra o mês passado com a antiga. Digitar "2000" chega aqui
+// quatro vezes no mesmo mês: só a primeira conta
+export function fecharBolsa(bolsasAte, antiga, hoje) {
+  const k = chaveMes(new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1));
+  return { ...bolsasAte, [k]: bolsasAte?.[k] ?? antiga };
+}
+
 // Tempo entre a chegada e `ate`, menos a parte do almoço que já passou
 export function trabalhadoMs(reg, ate) {
   const entrada = emMs(reg.entrada);
@@ -487,7 +503,7 @@ export function diasFechados(registro, de, ate) {
 
 const media = xs => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
 
-export function resumoPeriodo(registro, de, hoje, salario, metaPadrao, cal = CAL_PADRAO) {
+export function resumoPeriodo(registro, de, hoje, bolsaDe, metaPadrao, cal = CAL_PADRAO) {
   const ate = chaveDia(hoje);
   // Antes do primeiro registro a bolsa não conta: inflaria o valor da hora
   de = de > inicio(registro, hoje) ? de : inicio(registro, hoje);
@@ -501,7 +517,7 @@ export function resumoPeriodo(registro, de, hoje, salario, metaPadrao, cal = CAL
     if (k === ate && tipoDe(registro[k]) === "trabalho" && !fechado(registro[k])) break;
     const c = noSaldo(registro[k], metaPadrao);
     if (c) saldo += c.ms - c.meta;
-    if (util(d, registro, cal)) bolsa += valorDia(d, salario, registro, cal);
+    if (util(d, registro, cal)) bolsa += valorDia(d, bolsaDe(d), registro, cal);
   }
   const horas = dias.reduce((a, d) => a + d.ms, 0);
   return {

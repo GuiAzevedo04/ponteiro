@@ -74,6 +74,8 @@ conta, sem nuvem e sem anúncio.
 - **Só feriados nacionais do Brasil.** Os municipais e estaduais entram à mão,
   uma vez, em Ajustes.
 - **Só real e dólar, só português e inglês.**
+- **A bolsa muda do mês do ajuste em diante.** Os meses anteriores ficam com o
+  valor antigo, e não há como corrigir um mês já encerrado.
 - **Cotação de hoje para tudo.** Com "Mostrar em" numa moeda diferente da
   bolsa, meses passados também são convertidos pela cotação do dia.
 - **Sem internet, vale a última cotação guardada.** Sem nenhuma, os valores
