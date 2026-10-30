@@ -79,9 +79,9 @@ function traduzirPagina() {
 
 // Troca o idioma da tela pelo dos ajustes (que pode ter vindo de outra aba)
 async function aplicarIdioma() {
-  const codigo = cfg().idioma;
-  if (codigo === T.codigo) return;
-  T = await carregarIdioma(codigo);
+  const novo = await carregarIdioma(cfg().idioma);
+  if (novo === T) return;
+  T = novo;
   local.gravar("horas.idioma", T.codigo);
   traduzirPagina();
   aoMudarDeFora();
@@ -392,7 +392,7 @@ document.addEventListener("keydown", e => {
 // Dado mudou fora desta tela (sincronização, outra aba): redesenha o que aparece
 function aoMudarDeFora() {
   if (!pronto) return;
-  if (cfg().idioma !== T.codigo) return void aplicarIdioma();
+  if (cfg().idioma !== T.codigo) aplicarIdioma();
   aplicarTema();
   preencherCampos();
   recalcular();
