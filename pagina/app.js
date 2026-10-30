@@ -541,9 +541,11 @@ function recalcular() {
     ? semana(inicioDaSemana(agora), dados.registro, horasDia, chaveDia(somaDias(agora, 1))).saldo : null;
   const compensar = c.temExtra ? -saldo / HORA : 0;
   const vDia = valorDia(agora, c.bolsa(agora), dados.registro, cal);
+  // Antes do primeiro registro a bolsa não conta, como no histórico
+  const primeiro = deChave(inicio(dados.registro, agora));
   let diasPassados = 0;
   for (let d = new Date(agora.getFullYear(), agora.getMonth(), 1); d.getDate() < agora.getDate(); d = somaDias(d, 1)) {
-    if (util(d, dados.registro, cal)) diasPassados++;
+    if (d >= primeiro && util(d, dados.registro, cal)) diasPassados++;
   }
   const temEntrada = Boolean(reg.entrada) && horasDia > 0;
   calc = {
