@@ -469,11 +469,13 @@ const regDosCampos = () => ({
   tipo: $("tipoHoje").value,
 });
 
-// Fim de semana só entra se já tiver registro (ou se a saída for registrada)
-function registrarHoje() {
+// Fim de semana só entra se já tiver registro (ou se a saída for registrada).
+// Hoje apagado só volta se a pessoa digitar: abrir a página não o recria.
+function registrarHoje(digitou = false) {
   const agora = new Date();
   const k = chaveDia(agora);
   const atual = vivo(dados.registro[k]);
+  if (!atual && !digitou && dados.registro[k]?.apagado) return;
   if (!atual && !util(agora, dados.registro, cfg().cal)) return;
   const novo = regDosCampos();
   // Só grava se algo mudou: abrir a página não pode virar uma gravação
@@ -491,7 +493,7 @@ function aoEditarHoje() {
     almocoHoras: String(r.almocoHoras),
     temAlmoco: String($("temAlmoco").checked),
   });
-  registrarHoje();
+  registrarHoje(true);
   $("almoco").disabled = !$("temAlmoco").checked;
   recalcular();
   desenharSegundo(new Date());
