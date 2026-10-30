@@ -9,6 +9,7 @@ import sys
 if sys.version_info < (3, 8):
     sys.exit("O servidor de horas precisa do Python 3.8 ou mais novo.")
 
+import http.client
 import json
 import os
 import re
@@ -88,7 +89,7 @@ def buscar_cambio(url=CAMBIO_URL):
             "base": bruto["base_code"],
             "taxas": taxas,
         }
-    except (OSError, ValueError, KeyError, TypeError, AttributeError, OverflowError):
+    except (OSError, http.client.HTTPException, ValueError, KeyError, TypeError, AttributeError, OverflowError):
         return None
 
 
