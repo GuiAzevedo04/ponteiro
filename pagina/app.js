@@ -916,7 +916,10 @@ for (const id of CAMPOS_AJUSTES) {
 // Uma linha por feriado extra; "todo ano" guarda só o mês e o dia
 function linhaExtra(e = { data: "", nome: "", tipo: "feriado" }) {
   const todoAno = e.data.length === 5;
-  const valor = todoAno ? `${new Date().getFullYear()}-${e.data}` : e.data;
+  // 29/02 só existe em ano bissexto: noutro ano o campo ficaria vazio e a linha sumiria ao guardar
+  let ano = new Date().getFullYear();
+  if (e.data === "02-29") while (new Date(ano, 1, 29).getMonth() !== 1) ano++;
+  const valor = todoAno ? `${ano}-${e.data}` : e.data;
   const opcao = (v, rotulo) => `<option value="${v}"${e.tipo === v ? " selected" : ""}>${esc(rotulo)}</option>`;
   const x = t();
   return `<div class="extra">`
