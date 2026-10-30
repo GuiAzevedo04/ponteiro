@@ -16,6 +16,7 @@ import shutil
 import tempfile
 import threading
 import time
+import traceback
 from datetime import date, datetime, timedelta, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -299,6 +300,7 @@ class Handler(SimpleHTTPRequestHandler):
                 self.server.gravar(dados)
             except OSError:
                 # Disco cheio, arquivo preso: a página guarda a mudança e tenta de novo
+                traceback.print_exc()
                 return self.send_error(500, "Não deu para gravar registro.json")
         self.send_response(204)
         self.send_header("ETag", f'"{dados["versao"]}"')
