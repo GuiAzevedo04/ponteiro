@@ -681,13 +681,13 @@ function desenharLinha(desde, ms) {
 }
 
 // Os dias de trabalho desta semana (segunda a sexta, mais um fim de semana trocado
-// para trabalho), com o trabalhado de cada um
+// para trabalho ou com registro), com o trabalhado de cada um
 function desenharSemana(msHoje) {
   const { cal } = cfg();
   const inicio = inicioDaSemana(deChave(calc.k));
   const meta = calc.horasDia * HORA;
   const dias = Array.from({ length: 7 }, (_, i) => somaDias(inicio, i))
-    .filter(d => !cal.fimDeSemana(d));
+    .filter(d => !cal.fimDeSemana(d) || vivo(dados.registro[chaveDia(d)]));
   $("semanaDias").style.gridTemplateColumns = `repeat(${dias.length}, 1fr)`;
   const html = dias.map(d => {
     const k = chaveDia(d);
