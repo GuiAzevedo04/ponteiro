@@ -559,8 +559,8 @@ function recalcular() {
   desenharPendencia(agora);
   armarAviso();
   if (tela === "historico") atualizarHojeNoHistorico(agora);
-  // Ficou algo sem subir porque o servidor estava desligado: tenta de novo
-  if (pendente && online === false && !enviando) sincronizar();
+  // Sem servidor: tenta de novo, e o que ficou sem subir sobe junto
+  if (online === false && !enviando) sincronizar();
 }
 
 // Dia de trabalho sem saída (ou com saída antes da chegada) fica fora do
