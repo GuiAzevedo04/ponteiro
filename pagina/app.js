@@ -68,7 +68,6 @@ function traduzirPagina() {
     for (const e of document.querySelectorAll(`[${nome}]`)) e.setAttribute(atributo, x[e.dataset[dado]]);
   }
   document.querySelector('meta[name="description"]').content = x.descricao;
-  poe($("colPorHora"), x.colPorHora(simboloMoeda(cfg().moeda, T.locale)));
   for (const b of document.querySelectorAll("[data-tabela]")) {
     poe(b, b.closest("figure").classList.contains("em-tabela") ? x.verGrafico : x.verTabela);
   }
@@ -1099,6 +1098,7 @@ function renderHistorico() {
   const { cal } = c;
   const metaPadrao = c.metaDia;
   const primeiro = deChave(inicio(dados.registro, agora));
+  poe($("colPorHora"), t().colPorHora(simboloMoeda(c.moeda, T.locale)));
   const titulo = fmtData(mesVisto, T.locale, { month: "long", year: "numeric" });
   $("tituloMes").textContent = titulo[0].toUpperCase() + titulo.slice(1);
   $("mesAnterior").disabled = mesVisto <= primeiroDoMes(primeiro);
