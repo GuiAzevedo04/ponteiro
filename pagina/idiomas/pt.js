@@ -227,6 +227,9 @@ export default {
     eMais: (lista, n) => `${lista} e mais ${n}`,
     voltam: (lista, n) => `Voltam a ser como no backup: ${lista} (${dias(n)}). Os ajustes não mudam.`,
     backupIlegivel: "Não deu para ler este backup.",
+    dados: "Seus dados",
+    dadosNota: "Leve tudo para outra máquina ou guarde uma cópia: registro e ajustes, no mesmo formato de horas/dados/registro.json.",
+    exportar: "Exportar tudo",
     restaurado: (dia, n) => `Registro de volta ao começo de ${dia} (${dias(n)})`,
   },
 };

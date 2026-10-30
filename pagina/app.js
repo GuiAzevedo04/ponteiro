@@ -1030,6 +1030,10 @@ $("btnRestaurar").addEventListener("click", () => {
   }, 15000);
 });
 
+$("btnExportar").addEventListener("click", () => {
+  baixar(`horas-${chaveDia(new Date())}.json`, JSON.stringify(dados, null, 2), "application/json");
+});
+
 // ------------------------------------------------------------------ histórico
 
 const primeiroDoMes = d => new Date(d.getFullYear(), d.getMonth(), 1);

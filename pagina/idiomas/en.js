@@ -221,6 +221,9 @@ export default {
     eMais: (lista, n) => `${lista} and ${n} more`,
     voltam: (lista, n) => `Go back to how they were in the backup: ${lista} (${days(n)}). Settings don't change.`,
     backupIlegivel: "Couldn't read this backup.",
+    dados: "Your data",
+    dadosNota: "Move everything to another machine or keep a copy: record and settings, in the same format as horas/dados/registro.json.",
+    exportar: "Export everything",
     restaurado: (dia, n) => `Record back to the start of ${dia} (${days(n)})`,
   },
 };
