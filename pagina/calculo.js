@@ -57,7 +57,7 @@ export function fmtH(ms, d = DURACAO_PT) {
   const min = Math.round(Math.abs(ms) / MINUTO);
   return d.total(Math.floor(min / 60), pad(min % 60));
 }
-export const fmtSaldo = (ms, d = DURACAO_PT) => (ms < 0 ? "−" : "+") + fmtH(ms, d);
+export const fmtSaldo = (ms, d = DURACAO_PT) => (Math.round(ms / MINUTO) < 0 ? "−" : "+") + fmtH(ms, d);
 
 // Palavras de hora e de minuto em português e inglês, por extenso e abreviadas.
 // Valem nos dois idiomas: quem digita "1 hour" com o app em português também é entendido.
@@ -199,14 +199,17 @@ export const saidaAntes = reg => Boolean(vivo(reg)?.entrada && reg.saida && emMs
 
 // Dia fechado = tem chegada e saída, nessa ordem
 export const fechado = reg => Boolean(vivo(reg)?.entrada && reg.saida) && !saidaAntes(reg);
-export const trabalhadoDia = reg => trabalhadoMs(reg, emMs(reg.saida));
+// Em minutos inteiros, como a meta: um almoço de 35min em horas (0,5833…) e uma
+// meta de 5,5h / 5 deixam um resto, e o saldo de um dia exato nunca daria zero
+export const trabalhadoDia = reg => Math.round(trabalhadoMs(reg, emMs(reg.saida)) / MINUTO) * MINUTO;
+const metaMs = (reg, metaPadrao) => Math.round((reg?.meta ?? metaPadrao) * 60) * MINUTO;
 
 // Quanto um dia entra no saldo: trabalho fechado conta horas e meta; folga só
 // a meta; férias, atestado e feriado ficam de fora
 export function noSaldo(reg, metaPadrao) {
   if (!vivo(reg)) return null;
   const tipo = tipoDe(reg);
-  const meta = (reg.meta ?? metaPadrao) * HORA;
+  const meta = metaMs(reg, metaPadrao);
   if (tipo === "folga") return { ms: 0, meta };
   if (tipo !== "trabalho" || !fechado(reg)) return null;
   return { ms: trabalhadoDia(reg), meta };
@@ -248,7 +251,7 @@ export function ritmoSemana(registro, agora, metaPadrao, msHoje, cal = CAL_PADRA
     // Daqui em diante, fim de semana e feriado só entram se tiverem registro
     const tipo = tipoDe(reg);
     if ((!reg && !util(d, registro, cal)) || !TIPOS[tipo].meta) continue;
-    meta += (reg?.meta ?? metaPadrao) * HORA;
+    meta += metaMs(reg, metaPadrao);
     if (tipo !== "trabalho") continue;
     if (k === hoje && fechado(reg)) antes += trabalhadoDia(reg);
     else {
@@ -284,7 +287,7 @@ export function projecaoMes(registro, agora, metaPadrao, cal = CAL_PADRAO) {
       }
     } else if (reg || util(d, registro, cal)) {
       if (tipo === "trabalho") restantes++;
-      else if (tipo === "folga") folgas += (reg.meta ?? metaPadrao) * HORA;
+      else if (tipo === "folga") folgas += metaMs(reg, metaPadrao);
     }
   }
   const media = base ? sobra / base : null;
