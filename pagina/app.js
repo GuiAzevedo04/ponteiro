@@ -1043,7 +1043,7 @@ function campoHist(campo, tipo, valor, bloqueado, rotulo, invalido = false) {
 
 function linhaSemana(segunda, metaPadrao, hoje) {
   const sexta = somaDias(segunda, 4);
-  const { ms, meta, saldo } = semana(segunda, dados.registro, metaPadrao);
+  const { ms, meta, saldo } = semana(segunda, dados.registro, metaPadrao, chaveDia(somaDias(deChave(hoje), 1)));
   const tot = meta ? t().semanaTotal(H(ms), H(meta), saldoHtml(saldo))
     : chaveDia(segunda) > hoje ? "" : `<span class="apagado">${esc(t().nenhumDiaFechado)}</span>`;
   return `<tr class="semana"><td colspan="10"><div class="semanaLinha"><span>${esc(t().semanaDeA(dm(segunda), dm(sexta)))}</span><span>${tot}</span></div></td></tr>`;

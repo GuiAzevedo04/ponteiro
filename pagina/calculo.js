@@ -426,8 +426,10 @@ export function restaurar(dados, backup, agora = Date.now()) {
 // ------------------------------------------------------------------ relatório
 
 export function linhasDoMes(ano, mes, registro, metaPadrao, hoje = new Date(), cal = CAL_PADRAO) {
+  const ultimo = chaveDia(hoje);
   return diasDoMes(ano, mes, registro, hoje, cal).map(({ k, reg, feriado }) => {
-    const conta = noSaldo(reg, metaPadrao);
+    // Folga marcada à frente só entra no saldo quando o dia chega
+    const conta = k > ultimo ? null : noSaldo(reg, metaPadrao);
     return {
       k,
       tipo: feriado ? "feriado" : tipoDe(reg),
@@ -483,9 +485,10 @@ export function csvDoMes(linhas, o = CSV_PT) {
 // As `n` semanas que terminam na semana de `fim`, mais antiga primeiro
 export function semanasAte(fim, n, registro, metaPadrao) {
   const ultima = inicioDaSemana(fim);
+  const amanha = chaveDia(somaDias(fim, 1));
   return Array.from({ length: n }, (_, i) => {
     const segunda = somaDias(ultima, -7 * (n - 1 - i));
-    return { segunda, ...semana(segunda, registro, metaPadrao) };
+    return { segunda, ...semana(segunda, registro, metaPadrao, amanha) };
   });
 }
 
