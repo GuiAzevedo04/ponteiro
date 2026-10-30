@@ -426,6 +426,130 @@ export function restaurar(dados, backup, agora = Date.now()) {
   return { dados: { ...dados, registro }, mudados: mudados.sort() };
 }
 
+// Lê um arquivo exportado (ou um backup). É a única porta de entrada de dados
+// de fora: um valor que derruba as contas derrubaria toda tela, e o servidor
+// guardaria o erro. Os limites só barram o que estoura: o que a tela de ajustes
+// aceita digitar tem de voltar do próprio arquivo.
+const objeto = v => v !== null && typeof v === "object" && !Array.isArray(v);
+const HORARIO = /^([01]\d|2[0-3]):[0-5]\d$/;
+const MAX_HORAS = 1000;
+const MAX_BOLSA = 1e12;
+
+const ehTexto = v => typeof v === "string";
+const horario = v => ehTexto(v) && (v === "" || HORARIO.test(v));
+const numeroEm = max => v => ehTexto(v) && Math.abs(Number(v)) <= max; // Number("") = 0: campo limpo
+const moeda = v => ehTexto(v) && /^([A-Za-z]{3})?$/.test(v);
+const horas = v => typeof v === "number" && Math.abs(v) <= MAX_HORAS;
+const marca = v => v === undefined || Number.isFinite(v);
+const marcas = m => m === undefined || (objeto(m) && Object.values(m).every(Number.isFinite));
+
+// Ajuste fora da tabela (nome, tema, o `pais` que saiu do app...) só precisa ser texto
+const AJUSTES = {
+  horasSemana: numeroEm(MAX_HORAS),
+  almocoHoras: numeroEm(MAX_HORAS),
+  salario: numeroEm(MAX_BOLSA),
+  entrada: horario,
+  almoco: horario,
+  moeda,
+  moedaBolsa: moeda,
+  idioma: v => ehTexto(v) && /^[a-z]{2}$/.test(v), // idioma que saiu do app cai em português
+  bolsasAte: v => objeto(v) && Object.entries(v).every(([m, b]) => /^\d{4}-\d{2}$/.test(m) && numeroEm(MAX_BOLSA)(b)),
+};
+
+export function lerCopia(texto) {
+  const recusa = motivo => { throw new Error(motivo); };
+  const copia = JSON.parse(texto);
+  if (!objeto(copia) || !objeto(copia.registro)) recusa("sem registro");
+  // Sem ajustes, substituir apagaria todos; o app sempre grava ao menos o idioma
+  if (!objeto(copia.campos) || !Object.keys(copia.campos).length) recusa("sem ajustes");
+  if (!marcas(copia.camposT) || !marca(copia.camposAtualizado)) recusa("hora de edição inválida");
+  for (const [k, reg] of Object.entries(copia.registro)) {
+    // Um dia perdido em outra década faria o histórico e as contas começarem lá
+    if (!/^20[2-9]\d-/.test(k) || chaveDia(deChave(k)) !== k) recusa(`dia inválido: ${k}`);
+    if (!objeto(reg)) recusa(`${k}: não é um dia`);
+    if (!marcas(reg.t) || !marca(reg.atualizado)) recusa(`${k}: hora de edição inválida`);
+    for (const c of ["entrada", "almoco", "saida"]) {
+      if (reg[c] !== undefined && !horario(reg[c])) recusa(`${k}: ${c} inválido`);
+    }
+    if (reg.meta !== undefined && !horas(reg.meta)) recusa(`${k}: meta inválida`);
+    if (reg.almocoHoras !== undefined && !horas(reg.almocoHoras)) recusa(`${k}: almocoHoras inválido`);
+    if (reg.almoco && reg.almocoHoras === undefined) recusa(`${k}: almoço sem duração`);
+    if (reg.tipo && !Object.hasOwn(TIPOS, reg.tipo)) recusa(`${k}: tipo desconhecido`);
+  }
+  for (const [c, v] of Object.entries(copia.campos)) {
+    if (!(Object.hasOwn(AJUSTES, c) ? AJUSTES[c] : ehTexto)(v)) recusa(`ajuste inválido: ${c}`);
+  }
+  return copia;
+}
+
+// Edição do futuro (relógio adiantado na máquina do arquivo) venceria tudo o
+// que for digitado aqui até o relógio chegar lá
+const ateAgora = (mapa, agora) => Object.fromEntries(Object.entries(mapa).map(([c, q]) => [c, Math.min(q, agora)]));
+function semFuturo(copia, agora) {
+  const registro = {};
+  for (const [k, reg] of Object.entries(copia.registro)) {
+    registro[k] = { ...reg, atualizado: Math.min(reg.atualizado ?? 0, agora), ...(reg.t && { t: ateAgora(reg.t, agora) }) };
+  }
+  return { ...copia, registro, camposAtualizado: Math.min(copia.camposAtualizado ?? 0, agora),
+    ...(copia.camposT && { camposT: ateAgora(copia.camposT, agora) }) };
+}
+
+// O que só o arquivo tem entra, salvo se uma hora aqui disser que foi tirado.
+// Ganha a hora de agora: sem ela, a próxima junção tiraria de novo. Diz se entrou algo.
+function completar(juntos, t, arquivo, horasAqui, agora) {
+  const novos = Object.keys(arquivo).filter(c => !(c in juntos) && !horasAqui?.[c]);
+  for (const c of novos) {
+    juntos[c] = arquivo[c];
+    t[c] = agora;
+  }
+  return novos.length > 0;
+}
+
+const MODOS_IMPORTAR = {
+  // Fica igual ao arquivo, ajustes inclusive. Todo ajuste ganha a hora de agora,
+  // para um que o arquivo não tem também vencer a cópia velha de outra aba.
+  substituir(dados, copia, agora) {
+    const camposT = {};
+    for (const c of new Set([...Object.keys(dados.campos ?? {}), ...Object.keys(dados.camposT ?? {}), ...Object.keys(copia.campos)])) camposT[c] = agora;
+    return { ...restaurar(dados, copia, agora).dados, campos: { ...copia.campos }, camposT, camposAtualizado: agora };
+  },
+  // Campo a campo, vale a edição mais recente. No empate fica o que está aqui:
+  // é o contrário da sincronização, em que o arquivo do servidor é a verdade.
+  juntar(dados, bruta, agora) {
+    const copia = semFuturo(bruta, agora);
+    const juntos = mesclar(copia, dados).dados;
+    for (const [k, reg] of Object.entries(copia.registro)) {
+      const aqui = vivo(dados.registro[k]);
+      const dia = juntos.registro[k];
+      if (!aqui || !vivo(reg) || !vivo(dia)) continue;
+      if (completar(dia, dia.t, semMeta(reg), aqui.t, agora)) dia.atualizado = agora;
+    }
+    if (completar(juntos.campos, juntos.camposT, copia.campos, dados.camposT, agora)) juntos.camposAtualizado = agora;
+    return { ...dados, ...juntos };
+  },
+};
+
+// `mudados`: os dias que ficam, novos ou diferentes. `saem`: os que deixam de
+// existir. `ajustesMudam`: os ajustes não ficam como estavam. Tudo em ordem.
+export function importar(dados, copia, modo, agora = Date.now()) {
+  const novos = MODOS_IMPORTAR[modo](dados, copia, agora);
+  const mudados = [];
+  const saem = [];
+  for (const k of [...new Set([...Object.keys(dados.registro), ...Object.keys(novos.registro)])].sort()) {
+    const antes = vivo(dados.registro[k]);
+    const depois = vivo(novos.registro[k]);
+    if (antes && !depois) saem.push(k);
+    else if (depois && (!antes || !mesmoConteudo(semMeta(antes), semMeta(depois)))) mudados.push(k);
+  }
+  return { dados: novos, mudados, saem, ajustesMudam: !mesmoConteudo(dados.campos ?? {}, novos.campos ?? {}) };
+}
+
+// A volta é datada logo depois da importação (`quando`): vence a cópia importada
+// de outra aba e perde de quem editou depois, então essas edições ficam.
+export function desfazerImportacao(dados, antes, depois, quando) {
+  return { ...dados, ...mesclar(dados, importar(depois, antes, "substituir", quando + 1).dados).dados };
+}
+
 // ------------------------------------------------------------------ relatório
 
 export function linhasDoMes(ano, mes, registro, metaPadrao, hoje = new Date(), cal = CAL_PADRAO) {

@@ -215,9 +215,19 @@
     </fieldset>
     <fieldset>
       <legend data-t="dados">Seus dados</legend>
-      <p class="nota" data-t="dadosNota">Leve tudo para outra máquina ou guarde uma cópia: registro e ajustes, no mesmo formato de horas/dados/registro.json.</p>
+      <p class="nota" data-t="dadosNota">Leve tudo para outra máquina ou guarde uma cópia: registro e ajustes, no mesmo formato de horas/dados/registro.json. Substituir deixa tudo igual ao arquivo; juntar fica com a edição mais recente de cada campo. Exporte antes de importar.</p>
       <div class="acoes"><button type="button" class="botao" id="btnExportar" data-t="exportar">Exportar tudo</button></div>
-          </fieldset>
+      <div class="acoes"><button type="button" class="botao" id="btnImportar" data-t="importar">Importar…</button></div>
+      <input type="file" id="arquivoImportar" accept=".json,application/json" hidden>
+      <label><span data-t="aoImportar">Modo</span>
+        <select id="modoImportar">
+          <option value="substituir" data-t="modoSubstituir">Substituir tudo</option>
+          <option value="juntar" data-t="modoJuntar">Juntar</option>
+        </select>
+      </label>
+      <p class="nota" id="importarInfo" role="status"></p>
+      <div class="acoes"><button type="button" class="botao" id="btnAplicarImportacao" data-t="aplicar" disabled>Aplicar</button></div>
+    </fieldset>
     <div class="acoes"><button class="botao primario" data-t="fechar">Fechar</button></div>
   </form>
 </dialog>

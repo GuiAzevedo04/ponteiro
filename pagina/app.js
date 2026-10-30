@@ -5,7 +5,7 @@ import {
   fmtSaldo, emMs, msParaHhmm, fmtHora, fmtDiaMes, fmtData, feriadoNacional, TIPOS, vivo, tipoDe, util, diasUteisMes,
   valorDia, trabalhadoMs, fechado, trabalhadoDia,
   saidaAntes, semana, saidaPara, inicio, diasDoMes, mesclar, linhasDoMes, totaisDoMes, csvDoMes, semanasAte,
-  diasFechados, resumoPeriodo, lerDuracao, fmtDuracao, ritmoSemana, projecaoMes, restaurar, taxaCambio, esc, bolsaDoMes, fecharBolsa,
+  diasFechados, resumoPeriodo, lerDuracao, fmtDuracao, ritmoSemana, projecaoMes, restaurar, lerCopia, importar, desfazerImportacao, taxaCambio, esc, bolsaDoMes, fecharBolsa,
 } from "./calculo.js";
 import { calendario } from "./feriados.js";
 import { desenharGraficos, esconderDica } from "./graficos.js";
@@ -891,6 +891,7 @@ $("btnAjustes").addEventListener("click", () => {
   desenharExtras();
   $("ajustes").showModal();
   listarBackups();
+  limparImportacao();
 });
 for (const id of CAMPOS_AJUSTES) {
   $(id).addEventListener("input", () => {
@@ -989,6 +990,12 @@ async function listarBackups() {
   }
 }
 
+// O ano só aparece quando não é o de agora
+const nomeDiaAno = k => (k.startsWith(new Date().getFullYear()) ? nomeDia(k) : `${nomeDia(k)} ${k.slice(0, 4)}`);
+const listaDias = mudados => (mudados.length > 6
+  ? t().eMais(mudados.slice(0, 5).map(nomeDiaAno).join(", "), mudados.length - 5)
+  : mudados.map(nomeDiaAno).join(", "));
+
 // Antes de restaurar, mostra quais dias voltariam
 $("backupData").addEventListener("change", async e => {
   const k = e.target.value;
@@ -1001,11 +1008,9 @@ $("backupData").addEventListener("change", async e => {
     if (e.target.value !== k) return; // trocou de dia enquanto lia
     const { mudados } = restaurar(dados, copia);
     if (!mudados.length) return limparBackup(t().backupIgual);
-    const lista = mudados.length > 6 ? t().eMais(mudados.slice(0, 5).map(nomeDia).join(", "), mudados.length - 5)
-      : mudados.map(nomeDia).join(", ");
     backupEscolhido = { k, copia };
     $("btnRestaurar").disabled = false;
-    poe($("backupInfo"), t().voltam(lista, mudados.length));
+    poe($("backupInfo"), t().voltam(listaDias(mudados), mudados.length));
   } catch {
     limparBackup(t().backupIlegivel);
   }
@@ -1032,6 +1037,74 @@ $("btnRestaurar").addEventListener("click", () => {
 
 $("btnExportar").addEventListener("click", () => {
   baixar(`horas-${chaveDia(new Date())}.json`, JSON.stringify(dados, null, 2), "application/json");
+});
+
+let copiaLida = null;
+const LIMITE_ARQUIVO = 5 * 1024 * 1024; // o servidor recusaria com 413
+
+function previaImportacao() {
+  const info = $("importarInfo");
+  $("btnAplicarImportacao").disabled = true;
+  if (!copiaLida) return;
+  const { dados: novos, mudados, saem, ajustesMudam } = importar(dados, copiaLida, $("modoImportar").value);
+  // As horas de edição fazem caber menos do que o tamanho do arquivo dizia
+  if (new Blob([JSON.stringify(novos)]).size > LIMITE_ARQUIVO) return poe(info, t().importarGrande);
+  if (!mudados.length && !saem.length && !ajustesMudam) return poe(info, t().backupIgual);
+  $("btnAplicarImportacao").disabled = false;
+  poe(info, [
+    mudados.length && t().importaMudam(listaDias(mudados), mudados.length),
+    saem.length && t().importaSaem(listaDias(saem), saem.length),
+    ajustesMudam ? t().ajustesMudam : t().ajustesFicam,
+  ].filter(Boolean).join(" "));
+}
+
+function limparImportacao(texto = "") {
+  copiaLida = null;
+  previaImportacao();
+  poe($("importarInfo"), texto);
+}
+
+$("btnImportar").addEventListener("click", () => $("arquivoImportar").click());
+$("modoImportar").addEventListener("change", previaImportacao);
+
+$("arquivoImportar").addEventListener("change", async e => {
+  const arquivo = e.target.files[0];
+  e.target.value = ""; // o mesmo arquivo pode ser escolhido de novo
+  if (!arquivo) return;
+  limparImportacao();
+  if (arquivo.size > LIMITE_ARQUIVO) return limparImportacao(t().importarGrande);
+  try {
+    const copia = lerCopia(await arquivo.text());
+    await sincronizar();
+    copiaLida = copia;
+    previaImportacao();
+  } catch {
+    limparImportacao(t().importarIlegivel);
+  }
+});
+
+$("btnAplicarImportacao").addEventListener("click", async () => {
+  const copia = copiaLida;
+  if (!copia) return;
+  const modo = $("modoImportar").value;
+  limparImportacao();
+  $("ajustes").close();
+  // O que outro aparelho gravou entra antes: senão o 409 traria de volta o que o arquivo tira
+  await sincronizar();
+  const antes = dados;
+  const agora = Date.now();
+  const { dados: novos, mudados, saem } = importar(antes, copia, modo, agora);
+  dados = novos;
+  salvar();
+  aoMudarDeFora();
+  toast(t().importado(mudados.length + saem.length), {
+    rotulo: t().desfazer,
+    fazer: () => {
+      dados = desfazerImportacao(dados, antes, novos, agora);
+      salvar();
+      aoMudarDeFora();
+    },
+  }, 15000);
 });
 
 // ------------------------------------------------------------------ histórico
