@@ -174,7 +174,7 @@ function cfg() {
     idioma: c.idioma ?? local.ler("horas.idioma") ?? "pt",
     moeda: taxa === null ? moedaBolsa : moedaPedida,
     taxa: taxa ?? 1,
-    metaDia: (Number(c.horasSemana) || 0) / cal.diasPorSemana,
+    metaDia: (Number(c.horasSemana) || 0) / 5,
     horasSemana: Number(c.horasSemana) || 0,
     salario: Number(c.salario) || 0,
     entrada: c.entrada,
@@ -531,12 +531,12 @@ function recalcular() {
   const horasDia = c.metaDia;
   const reg = regDosCampos();
   const saiu = vivo(dados.registro[k])?.saida || "";
-  const saldo = horasDia ? semana(inicioDaSemana(agora, cal), dados.registro, horasDia, k).saldo : 0;
+  const saldo = horasDia ? semana(inicioDaSemana(agora), dados.registro, horasDia, k).saldo : 0;
   // Depois da saída, o card mostra a semana já com hoje; antes, o saldo até
   // ontem é o que decide a hora de sair
   const fechouHoje = Boolean(saiu) && horasDia > 0 && fechado(vivo(dados.registro[k]));
   const saldoComHoje = fechouHoje
-    ? semana(inicioDaSemana(agora, cal), dados.registro, horasDia, chaveDia(somaDias(agora, 1))).saldo : null;
+    ? semana(inicioDaSemana(agora), dados.registro, horasDia, chaveDia(somaDias(agora, 1))).saldo : null;
   const compensar = c.temExtra ? -saldo / HORA : 0;
   const vDia = valorDia(agora, c.salario, dados.registro, cal);
   let diasPassados = 0;
@@ -682,10 +682,10 @@ function desenharLinha(desde, ms) {
 // para trabalho), com o trabalhado de cada um
 function desenharSemana(msHoje) {
   const { cal } = cfg();
-  const inicio = inicioDaSemana(deChave(calc.k), cal);
+  const inicio = inicioDaSemana(deChave(calc.k));
   const meta = calc.horasDia * HORA;
   const dias = Array.from({ length: 7 }, (_, i) => somaDias(inicio, i))
-    .filter(d => !cal.fimDeSemanaFixo(d.getDay()) || !cal.fimDeSemana(d));
+    .filter(d => !cal.fimDeSemana(d));
   $("semanaDias").style.gridTemplateColumns = `repeat(${dias.length}, 1fr)`;
   const html = dias.map(d => {
     const k = chaveDia(d);
@@ -1036,11 +1036,8 @@ function campoHist(campo, tipo, valor, bloqueado, rotulo, invalido = false) {
     + `${invalido ? ' aria-invalid="true"' : ""}${bloqueado ? " disabled" : ""}></td>`;
 }
 
-function linhaSemana(segunda, metaPadrao, hoje, cal) {
-  // Último dia de trabalho normal da semana: sexta, ou quinta onde a folga é sexta e sábado
-  let ultimo = 6;
-  while (ultimo > 0 && cal.fimDeSemanaFixo(somaDias(segunda, ultimo).getDay())) ultimo--;
-  const sexta = somaDias(segunda, ultimo);
+function linhaSemana(segunda, metaPadrao, hoje) {
+  const sexta = somaDias(segunda, 4);
   const { ms, meta, saldo } = semana(segunda, dados.registro, metaPadrao);
   const tot = meta ? t().semanaTotal(H(ms), H(meta), saldoHtml(saldo))
     : chaveDia(segunda) > hoje ? "" : `<span class="apagado">${esc(t().nenhumDiaFechado)}</span>`;
@@ -1110,10 +1107,10 @@ function renderHistorico() {
   let html = "";
   let semanaAtual = "";
   for (const dia of diasDoMes(ano, mes, dados.registro, agora, cal)) {
-    const seg = chaveDia(inicioDaSemana(deChave(dia.k), cal));
+    const seg = chaveDia(inicioDaSemana(deChave(dia.k)));
     if (seg !== semanaAtual) {
       semanaAtual = seg;
-      html += linhaSemana(deChave(seg), metaPadrao, hoje, cal);
+      html += linhaSemana(deChave(seg), metaPadrao, hoje);
     }
     html += linhaDia(dia, hoje, agora, c);
   }
@@ -1121,7 +1118,7 @@ function renderHistorico() {
   if (voltar) $("linhas").querySelector(voltar)?.focus();
 
   const tot = totaisDoMes(linhasDoMes(ano, mes, dados.registro, metaPadrao, agora, cal));
-  const saldo = semana(inicioDaSemana(agora, cal), dados.registro, metaPadrao, hoje).saldo;
+  const saldo = semana(inicioDaSemana(agora), dados.registro, metaPadrao, hoje).saldo;
   let uteis = 0;
   for (let d = new Date(ano, mes, 1); d.getMonth() === mes && d <= agora; d = somaDias(d, 1)) {
     if (d >= primeiro && util(d, dados.registro, cal)) uteis++;
@@ -1266,10 +1263,10 @@ function renderEstatisticas() {
   const metaPadrao = c.metaDia;
   const primeiro = deChave(inicio(dados.registro, agora));
   // Semanas antes do primeiro registro só achatariam os gráficos
-  const desdeInicio = Math.max(1, Math.round((inicioDaSemana(agora, cal) - inicioDaSemana(primeiro, cal)) / (7 * 24 * HORA)) + 1);
+  const desdeInicio = Math.max(1, Math.round((inicioDaSemana(agora) - inicioDaSemana(primeiro)) / (7 * 24 * HORA)) + 1);
   const n = periodo ? Math.min(periodo, desdeInicio) : desdeInicio;
   poe($("periodoNota"), periodo > desdeInicio ? t().registrosComecam(dm(primeiro)) : "");
-  const semanas = semanasAte(agora, n, dados.registro, metaPadrao, cal);
+  const semanas = semanasAte(agora, n, dados.registro, metaPadrao);
   const de = chaveDia(semanas[0].segunda);
   const r = resumoPeriodo(dados.registro, de, agora, c.salario, metaPadrao, cal);
 

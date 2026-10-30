@@ -73,9 +73,6 @@ export function calendario({ extras = [], idioma = "pt", semNome = "Feriado" } =
   // úteis do mês): a resposta de cada dia fica guardada
   const feriados = new Map();
   const cal = {
-    idioma, inicioSemana: 1, diasPorSemana: 5,
-    // Sábado e domingo, sem contar os extras que viram dia de trabalho
-    fimDeSemanaFixo: diaSemana => FIM_DE_SEMANA.has(diaSemana),
     // Nome do feriado do dia, ou undefined
     feriado(d) {
       const k = chave(d);

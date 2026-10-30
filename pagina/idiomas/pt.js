@@ -8,7 +8,6 @@ const dias = n => `${n} dia${n > 1 ? "s" : ""}`;
 export default {
   codigo: "pt",
   locale: "pt-BR",
-  nome: "Português",
   duracao: DURACAO_PT,
   // Rótulos dos eixos dos gráficos: horas somadas e hora do dia
   eixoHoras: v => `${v}h`,

@@ -131,7 +131,7 @@ export const fmtNumero = (n, locale = "pt-BR", casas = 2) =>
 export const CAL_PADRAO = calendario({ extras: [{ data: "10-13", nome: "Aniversário da cidade", tipo: "feriado" }] });
 
 export const feriadoNacional = (d, cal = CAL_PADRAO) => cal.feriado(d);
-export const inicioDaSemana = (d, cal = CAL_PADRAO) => somaDias(d, -((d.getDay() - cal.inicioSemana + 7) % 7));
+export const inicioDaSemana = d => somaDias(d, -((d.getDay() + 6) % 7));
 
 // ------------------------------------------------------------------ dias
 
@@ -222,7 +222,7 @@ export function ritmoSemana(registro, agora, metaPadrao, msHoje, cal = CAL_PADRA
   const hoje = chaveDia(agora);
   let antes = 0, meta = 0, dias = 0, comHoje = false;
   for (let i = 0; i < 7; i++) {
-    const d = somaDias(inicioDaSemana(agora, cal), i);
+    const d = somaDias(inicioDaSemana(agora), i);
     const k = chaveDia(d);
     const reg = vivo(registro[k]);
     if (k < hoje) {
@@ -469,8 +469,8 @@ export function csvDoMes(linhas, o = CSV_PT) {
 // ------------------------------------------------------------------ estatísticas
 
 // As `n` semanas que terminam na semana de `fim`, mais antiga primeiro
-export function semanasAte(fim, n, registro, metaPadrao, cal = CAL_PADRAO) {
-  const ultima = inicioDaSemana(fim, cal);
+export function semanasAte(fim, n, registro, metaPadrao) {
+  const ultima = inicioDaSemana(fim);
   return Array.from({ length: n }, (_, i) => {
     const segunda = somaDias(ultima, -7 * (n - 1 - i));
     return { segunda, ...semana(segunda, registro, metaPadrao) };

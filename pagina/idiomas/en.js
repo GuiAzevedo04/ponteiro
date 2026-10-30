@@ -5,7 +5,6 @@ const days = n => `${n} day${n === 1 ? "" : "s"}`;
 export default {
   codigo: "en",
   locale: "en-US",
-  nome: "English",
   duracao: {
     total: (h, mm) => `${h}h ${mm}m`,
     almoco: (h, m) => (h ? (m ? `${h}h ${pad(m)}m` : `${h}h`) : `${m}m`),
