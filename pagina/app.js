@@ -1244,17 +1244,21 @@ $("btnRelatorio").addEventListener("click", () => {
   print();
 });
 
+function baixar(nome, conteudo, tipo) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([conteudo], { type: tipo }));
+  a.download = nome;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
 $("btnCsv").addEventListener("click", () => {
   const ano = mesVisto.getFullYear();
   const mes = mesVisto.getMonth();
   const c = cfg();
   const csv = csvDoMes(linhasDoMes(ano, mes, dados.registro, c.metaDia, new Date(), c.cal),
     { ...T.csv, diaSemana: k => diaSem(deChave(k)), tipo: nomeTipo });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-  a.download = `horas-${ano}-${pad(mes + 1)}.csv`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  baixar(`horas-${ano}-${pad(mes + 1)}.csv`, csv, "text/csv;charset=utf-8");
 });
 
 // ------------------------------------------------------------------ estatísticas
