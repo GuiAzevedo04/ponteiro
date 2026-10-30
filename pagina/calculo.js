@@ -17,13 +17,14 @@ export const somaDias = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getD
 export const desdeMeiaNoite = d => d - new Date(d.getFullYear(), d.getMonth(), d.getDate());
 export const DIAS = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
 
-// Criar o Intl.NumberFormat custa mais que formatar: um por moeda e idioma
-const formatos = new Map();
-function formatoMoeda(moeda, idioma) {
-  const k = `${moeda}:${idioma}`;
-  if (!formatos.has(k)) formatos.set(k, new Intl.NumberFormat(idioma, { style: "currency", currency: moeda }));
-  return formatos.get(k);
+// Criar um formato do Intl custa mais que formatar: um por combinação de opções
+const intl = new Map();
+function formato(chave, criar) {
+  if (!intl.has(chave)) intl.set(chave, criar());
+  return intl.get(chave);
 }
+const formatoMoeda = (moeda, idioma) =>
+  formato(`moeda:${moeda}:${idioma}`, () => new Intl.NumberFormat(idioma, { style: "currency", currency: moeda }));
 
 export const dinheiro = (v, moeda = "BRL", idioma = "pt-BR") => formatoMoeda(moeda, idioma).format(v);
 // Quanto vale 1 `de` em `para`, pelas cotações do servidor (todas contra a
@@ -37,7 +38,7 @@ export function taxaCambio(cambio, de, para) {
 
 // O símbolo da moeda sozinho ("R$", "US$")
 export const simboloMoeda = (moeda = "BRL", idioma = "pt-BR") =>
-  new Intl.NumberFormat(idioma, { style: "currency", currency: moeda }).formatToParts(0).find(p => p.type === "currency").value;
+  formatoMoeda(moeda, idioma).formatToParts(0).find(p => p.type === "currency").value;
 
 // Valor oculto ("R$ •••••") montado pelo próprio Intl: o símbolo fica do lado
 // e com o espaço que o idioma usa
@@ -103,11 +104,6 @@ export function msParaHhmm(ms, arredonda = Math.floor) {
 
 // Horário e data para mostrar, no jeito do idioma ("17:00", "5:00 PM";
 // "22/10", "10/22"). O que se guarda continua "HH:MM".
-const intl = new Map();
-function formato(chave, criar) {
-  if (!intl.has(chave)) intl.set(chave, criar());
-  return intl.get(chave);
-}
 export function fmtHora(ms, locale = "pt-BR", arredonda = Math.floor) {
   const f = formato(`hora:${locale}`, () => {
     const doze = new Intl.DateTimeFormat(locale, { hour: "numeric" }).resolvedOptions().hour12;
