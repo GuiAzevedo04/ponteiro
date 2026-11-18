@@ -130,7 +130,7 @@
 </section>
 
 <section class="tela estatisticas" id="telaEstatisticas" aria-label="Estatísticas" data-t-aria="estatisticas" hidden>
-  <div class="filtros barra">
+  <div class="filtros">
     <div class="filtros" role="group" aria-label="Período" data-t-aria="periodo">
       <span class="rotulo" data-t="periodo">Período</span>
       <div class="segmentos">
@@ -151,10 +151,10 @@
   </div>
   <div class="kpis" id="kpis"></div>
   <div class="graficos">
-    <figure class="card grafico" id="gSemanas">
+    <figure class="card grafico" id="gHoras">
       <figcaption>
         <div>
-          <h2 id="tituloHoras" data-t="horasPorSemana">Horas por semana</h2>
+          <h2 id="tituloHoras">Horas por semana</h2>
           <div class="legenda-graf"><span class="chave" data-t="trabalhadoLegenda">Trabalhado</span><span class="chave traco" data-t="metaLegenda">Meta</span></div>
         </div>
         <button class="botao terciario" data-tabela>Ver tabela</button>
@@ -165,13 +165,13 @@
       <figcaption>
         <div>
           <h2 data-t="saldoAcumulado">Saldo acumulado</h2>
-          <p class="sub" id="subSaldo" data-t="saldoAcumuladoSub">Soma do saldo semana a semana desde o começo do período</p>
+          <p class="sub" id="subSaldo">Soma do saldo semana a semana desde o começo do período</p>
         </div>
         <button class="botao terciario" data-tabela>Ver tabela</button>
       </figcaption>
       <div class="area"></div>
     </figure>
-    <figure class="card grafico largo" id="gDias">
+    <figure class="card grafico largo" id="gExpediente">
       <figcaption>
         <div>
           <h2 data-t="expedienteDia">Expediente dia a dia</h2>

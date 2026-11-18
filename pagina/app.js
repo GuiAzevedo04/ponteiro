@@ -1344,13 +1344,12 @@ $("btnCsv").addEventListener("click", () => {
 // ------------------------------------------------------------------ estatísticas
 
 let periodo = 12;
-let porDia = false;
+let verDias = false;
 for (const chip of document.querySelectorAll(".chip")) {
   chip.addEventListener("click", () => {
-    const grupo = "semanas" in chip.dataset ? "[data-semanas]" : "[data-por]";
-    if (grupo === "[data-semanas]") periodo = Number(chip.dataset.semanas);
-    else porDia = chip.dataset.por === "dia";
-    for (const c of document.querySelectorAll(`.chip${grupo}`)) c.setAttribute("aria-pressed", String(c === chip));
+    if ("semanas" in chip.dataset) periodo = Number(chip.dataset.semanas);
+    else verDias = chip.dataset.por === "dia";
+    for (const c of chip.parentElement.children) c.setAttribute("aria-pressed", String(c === chip));
     renderEstatisticas();
   });
 }
@@ -1382,14 +1381,10 @@ function renderEstatisticas() {
 
   const dias = diasFechados(dados.registro, de, chaveDia(agora));
   larguraDesenhada = Math.round($("telaEstatisticas").getBoundingClientRect().width);
-  // O data-t acompanha, para a troca de idioma traduzir o título certo
-  for (const [id, chave] of [["tituloHoras", porDia ? "horasPorDia" : "horasPorSemana"],
-    ["subSaldo", porDia ? "saldoAcumuladoSubDia" : "saldoAcumuladoSub"]]) {
-    $(id).dataset.t = chave;
-    poe($(id), x[chave]);
-  }
-  const barras = porDia ? diasAte(semanas[0].data, agora, dados.registro, metaPadrao) : semanas;
-  desenharGraficos({ T, t, H, S, hora, dm, nomeDoDia }, barras, porDia, dias, r);
+  poe($("tituloHoras"), verDias ? x.horasPorDia : x.horasPorSemana);
+  poe($("subSaldo"), verDias ? x.saldoAcumuladoSubDia : x.saldoAcumuladoSub);
+  const barras = verDias ? diasAte(semanas[0].data, agora, dados.registro, metaPadrao) : semanas;
+  desenharGraficos({ T, t, H, S, hora, dm, nomeDoDia }, barras, verDias, dias, r);
 }
 
 // Reaproveita o desenho ao mudar o tamanho da janela, sem pular de layout

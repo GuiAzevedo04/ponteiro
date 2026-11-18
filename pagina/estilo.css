@@ -348,7 +348,7 @@ main { flex: 1; min-height: 0; padding: 0 32px 32px; display: flex; flex-directi
 body:has(#telaEstatisticas:not([hidden])) { height: auto; min-height: 100dvh; }
 .estatisticas { display: flex; flex-direction: column; gap: 24px; }
 .filtros { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.filtros.barra { gap: 12px 24px; }
+#telaEstatisticas > .filtros { gap: 12px 24px; }
 .kpis {
   display: flex;
   flex-wrap: wrap;
@@ -517,7 +517,8 @@ dialog form > .acoes:last-child {
   .direita { grid-area: 1 / 2; }
   .barra nav { grid-area: 2 / 1 / 3 / -1; }
   nav button { flex: 1; padding-inline: 8px; }
-  /* Período com a largura toda; em idioma de rótulo comprido, quebra em duas linhas de botões */
+  /* Período e Ver por com a largura toda; em idioma de rótulo comprido, quebra em duas linhas de botões */
+  #telaEstatisticas > .filtros > [role="group"] { width: 100%; }
   .segmentos { width: 100%; flex-wrap: wrap; }
   .segmentos button { flex: 1 1 auto; padding-inline: 8px; }
   /* O rótulo do almoço encosta nos da chegada e da saída */
