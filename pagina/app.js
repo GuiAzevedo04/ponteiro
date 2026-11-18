@@ -113,7 +113,7 @@ function lerJSON(k) {
 
 const PADRAO = {
   horasSemana: "30", salario: "3000", entrada: "08:00", almoco: "12:00", almocoHoras: "1",
-  temAlmoco: "true", temExtra: "false", nome: "", alertas: "false", tema: "escuro", cores: "padrao", ocultar: "true",
+  temAlmoco: "true", temExtra: "false", nome: "", alertas: "false", tema: "escuro", cores: "padrao", iconeAba: "dinamico", ocultar: "true",
 };
 
 // Persistência: o servidor.py guarda tudo em horas/dados/registro.json, que é a
@@ -186,6 +186,7 @@ function cfg() {
     alertas: c.alertas === "true",
     tema: c.tema,
     cores: c.cores,
+    iconeAba: c.iconeAba,
     ocultar: c.ocultar !== "false",
   };
 }
@@ -740,6 +741,8 @@ const previsao = p => p && p.base >= 3 && p.restantes > 0;
 // Favicon com o anel de progresso do dia; troca em passos de 5%
 let faviconPasso = -1;
 function desenharFavicon(p) {
+  const fixo = cfg().iconeAba;
+  if (fixo !== "dinamico") p = fixo === "cheio" ? 1 : 0;
   const passo = Math.min(20, Math.floor(p * 20));
   if (passo === faviconPasso) return;
   faviconPasso = passo;
@@ -854,7 +857,7 @@ function toast(texto, acao, duracao = 7000) {
 
 // ------------------------------------------------------------------ ajustes
 
-const CAMPOS_AJUSTES = ["horasSemana", "salario", "nome", "idioma", "tema", "cores", "moedaBolsa", "moeda"];
+const CAMPOS_AJUSTES = ["horasSemana", "salario", "nome", "idioma", "tema", "cores", "iconeAba", "moedaBolsa", "moeda"];
 $("idioma").innerHTML = Object.entries(IDIOMAS).map(([k, n]) => `<option value="${k}" lang="${k}">${esc(n)}</option>`).join("");
 
 // Moedas pelo nome, no idioma da tela
