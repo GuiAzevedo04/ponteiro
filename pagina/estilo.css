@@ -348,6 +348,7 @@ main { flex: 1; min-height: 0; padding: 0 32px 32px; display: flex; flex-directi
 body:has(#telaEstatisticas:not([hidden])) { height: auto; min-height: 100dvh; }
 .estatisticas { display: flex; flex-direction: column; gap: 24px; }
 .filtros { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.filtros.barra { gap: 12px 24px; }
 .kpis {
   display: flex;
   flex-wrap: wrap;

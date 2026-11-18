@@ -4,7 +4,7 @@ import {
   HORA, MINUTO, pad, hhmm, chaveDia, deChave, somaDias, inicioDaSemana, desdeMeiaNoite, dinheiro, dinheiroOculto, simboloMoeda, fmtH,
   fmtSaldo, emMs, msParaHhmm, fmtHora, fmtDiaMes, fmtData, feriadoNacional, TIPOS, vivo, tipoDe, util, diasUteisMes,
   valorDia, trabalhadoMs, fechado, trabalhadoDia,
-  saidaAntes, semana, saidaPara, inicio, diasDoMes, mesclar, linhasDoMes, totaisDoMes, csvDoMes, semanasAte,
+  saidaAntes, semana, saidaPara, inicio, diasDoMes, mesclar, linhasDoMes, totaisDoMes, csvDoMes, semanasAte, diasAte,
   diasFechados, resumoPeriodo, lerDuracao, fmtDuracao, ritmoSemana, projecaoMes, restaurar, lerCopia, importar, desfazerImportacao, taxaCambio, esc, bolsaDoMes, fecharBolsa,
 } from "./calculo.js";
 import { calendario } from "./feriados.js";
@@ -1344,10 +1344,13 @@ $("btnCsv").addEventListener("click", () => {
 // ------------------------------------------------------------------ estatísticas
 
 let periodo = 12;
+let porDia = false;
 for (const chip of document.querySelectorAll(".chip")) {
   chip.addEventListener("click", () => {
-    periodo = Number(chip.dataset.semanas);
-    for (const c of document.querySelectorAll(".chip")) c.setAttribute("aria-pressed", String(c === chip));
+    const grupo = "semanas" in chip.dataset ? "[data-semanas]" : "[data-por]";
+    if (grupo === "[data-semanas]") periodo = Number(chip.dataset.semanas);
+    else porDia = chip.dataset.por === "dia";
+    for (const c of document.querySelectorAll(`.chip${grupo}`)) c.setAttribute("aria-pressed", String(c === chip));
     renderEstatisticas();
   });
 }
@@ -1363,7 +1366,7 @@ function renderEstatisticas() {
   const n = periodo ? Math.min(periodo, desdeInicio) : desdeInicio;
   poe($("periodoNota"), periodo > desdeInicio ? t().registrosComecam(dm(primeiro)) : "");
   const semanas = semanasAte(agora, n, dados.registro, metaPadrao);
-  const de = chaveDia(semanas[0].segunda);
+  const de = chaveDia(semanas[0].data);
   const r = resumoPeriodo(dados.registro, de, agora, c.bolsa, metaPadrao, cal);
 
   const x = t();
@@ -1379,7 +1382,14 @@ function renderEstatisticas() {
 
   const dias = diasFechados(dados.registro, de, chaveDia(agora));
   larguraDesenhada = Math.round($("telaEstatisticas").getBoundingClientRect().width);
-  desenharGraficos({ T, t, H, S, hora, dm, nomeDoDia }, semanas, dias, r);
+  // O data-t acompanha, para a troca de idioma traduzir o título certo
+  for (const [id, chave] of [["tituloHoras", porDia ? "horasPorDia" : "horasPorSemana"],
+    ["subSaldo", porDia ? "saldoAcumuladoSubDia" : "saldoAcumuladoSub"]]) {
+    $(id).dataset.t = chave;
+    poe($(id), x[chave]);
+  }
+  const barras = porDia ? diasAte(semanas[0].data, agora, dados.registro, metaPadrao) : semanas;
+  desenharGraficos({ T, t, H, S, hora, dm, nomeDoDia }, barras, porDia, dias, r);
 }
 
 // Reaproveita o desenho ao mudar o tamanho da janela, sem pular de layout

@@ -130,13 +130,22 @@
 </section>
 
 <section class="tela estatisticas" id="telaEstatisticas" aria-label="Estatísticas" data-t-aria="estatisticas" hidden>
-  <div class="filtros" role="group" aria-label="Período" data-t-aria="periodo">
-    <span class="rotulo" data-t="periodo">Período</span>
-    <div class="segmentos">
-      <button class="chip" data-semanas="4" aria-pressed="false" data-t="semanas" data-t-arg="4">4 semanas</button>
-      <button class="chip" data-semanas="12" aria-pressed="true" data-t="semanas" data-t-arg="12">12 semanas</button>
-      <button class="chip" data-semanas="26" aria-pressed="false" data-t="semanas" data-t-arg="26">26 semanas</button>
-      <button class="chip" data-semanas="0" aria-pressed="false" data-t="tudo">Tudo</button>
+  <div class="filtros barra">
+    <div class="filtros" role="group" aria-label="Período" data-t-aria="periodo">
+      <span class="rotulo" data-t="periodo">Período</span>
+      <div class="segmentos">
+        <button class="chip" data-semanas="4" aria-pressed="false" data-t="semanas" data-t-arg="4">4 semanas</button>
+        <button class="chip" data-semanas="12" aria-pressed="true" data-t="semanas" data-t-arg="12">12 semanas</button>
+        <button class="chip" data-semanas="26" aria-pressed="false" data-t="semanas" data-t-arg="26">26 semanas</button>
+        <button class="chip" data-semanas="0" aria-pressed="false" data-t="tudo">Tudo</button>
+      </div>
+    </div>
+    <div class="filtros" role="group" aria-label="Ver por" data-t-aria="verPor">
+      <span class="rotulo" data-t="verPor">Ver por</span>
+      <div class="segmentos">
+        <button class="chip" data-por="semana" aria-pressed="true" data-t="porSemanas">Semanas</button>
+        <button class="chip" data-por="dia" aria-pressed="false" data-t="porDias">Dias</button>
+      </div>
     </div>
     <span class="sub" id="periodoNota"></span>
   </div>
@@ -145,7 +154,7 @@
     <figure class="card grafico" id="gSemanas">
       <figcaption>
         <div>
-          <h2 data-t="horasPorSemana">Horas por semana</h2>
+          <h2 id="tituloHoras" data-t="horasPorSemana">Horas por semana</h2>
           <div class="legenda-graf"><span class="chave" data-t="trabalhadoLegenda">Trabalhado</span><span class="chave traco" data-t="metaLegenda">Meta</span></div>
         </div>
         <button class="botao terciario" data-tabela>Ver tabela</button>
@@ -156,7 +165,7 @@
       <figcaption>
         <div>
           <h2 data-t="saldoAcumulado">Saldo acumulado</h2>
-          <p class="sub" data-t="saldoAcumuladoSub">Soma do saldo semana a semana desde o começo do período</p>
+          <p class="sub" id="subSaldo" data-t="saldoAcumuladoSub">Soma do saldo semana a semana desde o começo do período</p>
         </div>
         <button class="botao terciario" data-tabela>Ver tabela</button>
       </figcaption>

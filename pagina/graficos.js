@@ -8,10 +8,19 @@ const $ = id => document.getElementById(id);
 // Formatos do idioma da tela (os mesmos do app.js), trocados a cada desenho
 let T, t, H, S, hora, dm, nomeDoDia;
 
-export function desenharGraficos(formatos, semanas, dias, resumo) {
+// `barras` são semanas ou dias ({ data, ms, meta, saldo }); `U` são os textos de cada unidade
+export function desenharGraficos(formatos, barras, porDia, dias, resumo) {
   ({ T, t, H, S, hora, dm, nomeDoDia } = formatos);
-  graficoSemanas(semanas);
-  graficoSaldo(semanas);
+  const x = t();
+  const U = porDia
+    ? { col: x.colDia, rot: b => nomeDoDia(b.data), titulo: b => nomeDoDia(b.data), aria: x.diaAria, graf: x.grafPorDiaAria,
+      emAndamento: false, grafSaldo: x.grafSaldoDiaAria, ate: x.ateDia, colAte: x.colAteDia, ateAria: x.ateDiaAria,
+      colSaldo: x.colSaldoDia, naUnidade: x.noDia, rotSaldo: b => nomeDoDia(b.data) }
+    : { col: x.colSemanaDe, rot: b => dm(b.data), titulo: b => x.semanaDe(dm(b.data)), aria: x.semanaDeAria, graf: x.grafSemanasAria,
+      emAndamento: true, grafSaldo: x.grafSaldoAria, ate: x.ateSemanaDe, colAte: x.colAteSemanaDe, ateAria: x.ateSemanaDeAria,
+      colSaldo: x.colSaldoSemana, naUnidade: x.naSemana, rotSaldo: b => dm(b.data) };
+  graficoSemanas(barras, U);
+  graficoSaldo(barras, U);
   graficoDias(dias, resumo);
 }
 
@@ -51,8 +60,13 @@ const svgAbre = (L, A, rotulo) => `<svg width="${L}" height="${A}" viewBox="0 0 
 // Rótulos do eixo x: um a cada tantos, contando da direita (a semana atual sempre aparece)
 const mostraRotulo = (i, n, banda, largura = 48) => (n - 1 - i) % Math.max(1, Math.ceil(largura / banda)) === 0;
 
-function graficoSemanas(semanas) {
+function graficoSemanas(semanas, U) {
   const fig = $("gSemanas");
+  const tabela = {
+    cab: [U.col, t().colTrabalhado, t().colMeta, t().colSaldo],
+    linhas: semanas.map(s => [U.rot(s), H(s.ms), H(s.meta), S(s.saldo)]),
+  };
+  if (!semanas.length) return montarFigura("gSemanas", null, tabela);
   const L = Math.max(280, fig.querySelector(".area").clientWidth || fig.clientWidth - 48);
   const A = 220;
   const m = { t: 10, r: 8, b: 28, l: 46 };
@@ -72,36 +86,38 @@ function graficoSemanas(semanas) {
   semanas.forEach((s, i) => {
     const cx = m.l + banda * (i + 0.5);
     const hv = s.ms / HORA;
-    const parcial = i === semanas.length - 1 ? " parcial" : "";
+    const parcial = U.emAndamento && i === semanas.length - 1 ? " parcial" : "";
     if (hv > 0) g += `<path class="barra${parcial}" data-i="${i}" d="${colunaPath(cx - larg / 2, y(hv), larg, y(0) - y(hv))}"/>`;
     if (s.meta) g += `<line class="meta" x1="${cx - larg / 2 - 3}" x2="${cx + larg / 2 + 3}" y1="${y(s.meta / HORA)}" y2="${y(s.meta / HORA)}"/>`;
-    if (mostraRotulo(i, semanas.length, banda)) g += `<text class="eixo" x="${cx}" y="${A - 6}" text-anchor="middle">${dm(s.segunda)}</text>`;
+    if (mostraRotulo(i, semanas.length, banda)) g += `<text class="eixo" x="${cx}" y="${A - 6}" text-anchor="middle">${dm(s.data)}</text>`;
   });
   semanas.forEach((s, i) => {
-    g += `<rect class="alvo" data-i="${i}" tabindex="0" x="${m.l + banda * i}" y="${m.t}" width="${banda}" height="${h}" aria-label="${esc(t().semanaDeAria(dm(s.segunda), H(s.ms), H(s.meta)))}"/>`;
+    g += `<rect class="alvo" data-i="${i}" tabindex="0" x="${m.l + banda * i}" y="${m.t}" width="${banda}" height="${h}" aria-label="${esc(U.aria(U.rot(s), H(s.ms), H(s.meta)))}"/>`;
   });
-  const area = montarFigura("gSemanas", `${svgAbre(L, A, t().grafSemanasAria)}${g}</svg>`, {
-    cab: [t().colSemanaDe, t().colTrabalhado, t().colMeta, t().colSaldo],
-    linhas: semanas.map(s => [dm(s.segunda), H(s.ms), H(s.meta), S(s.saldo)]),
-  });
+  const area = montarFigura("gSemanas", `${svgAbre(L, A, U.graf)}${g}</svg>`, tabela);
   ligarDicas(area, i => {
     const s = semanas[i];
     return {
-      titulo: t().semanaDe(dm(s.segunda)) + (i === semanas.length - 1 ? t().emAndamento : ""),
+      titulo: U.titulo(s) + (U.emAndamento && i === semanas.length - 1 ? t().emAndamento : ""),
       linhas: [[H(s.ms), t().trabalhado, ""], [H(s.meta), t().meta, "neutra"], [S(s.saldo), t().saldo, "nada"]],
     };
   });
 }
 
-function graficoSaldo(semanas) {
+function graficoSaldo(semanas, U) {
   const fig = $("gSaldo");
+  let soma = 0;
+  const acum = semanas.map(s => (soma += s.saldo) / HORA);
+  const tabela = {
+    cab: [U.colAte, U.colSaldo, t().colAcumulado],
+    linhas: semanas.map((s, i) => [U.rotSaldo(s), S(s.saldo), S(acum[i] * HORA)]),
+  };
+  if (!semanas.length) return montarFigura("gSaldo", null, tabela);
   const L = Math.max(280, fig.querySelector(".area").clientWidth || fig.clientWidth - 48);
   const A = 220;
   const m = { t: 14, r: 68, b: 28, l: 56 };
   const w = L - m.l - m.r;
   const h = A - m.t - m.b;
-  let soma = 0;
-  const acum = semanas.map(s => (soma += s.saldo) / HORA);
   const lo = Math.min(0, ...acum);
   const hi = Math.max(0, ...acum);
   const passo = passoBonito(Math.max(1, hi - lo));
@@ -116,7 +132,7 @@ function graficoSaldo(semanas) {
       + `<text class="eixo" x="${m.l - 8}" y="${y(v)}" dy="0.32em" text-anchor="end">${v > 0 ? "+" : v < 0 ? "−" : ""}${T.eixoHoras(decimal(Math.abs(v)))}</text>`;
   }
   semanas.forEach((s, i) => {
-    if (mostraRotulo(i, semanas.length, banda)) g += `<text class="eixo" x="${x(i)}" y="${A - 6}" text-anchor="middle">${dm(s.segunda)}</text>`;
+    if (mostraRotulo(i, semanas.length, banda)) g += `<text class="eixo" x="${x(i)}" y="${A - 6}" text-anchor="middle">${dm(s.data)}</text>`;
   });
   const pontos = acum.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`);
   g += `<path class="lavagem" d="M${x(0)},${y(0)}L${pontos.join("L")}L${x(acum.length - 1)},${y(0)}Z"/>`;
@@ -128,15 +144,12 @@ function graficoSaldo(semanas) {
     g += `<g class="foco" data-i="${i}"><line x1="${x(i)}" x2="${x(i)}" y1="${m.t}" y2="${m.t + h}"/><circle class="ponto" cx="${x(i)}" cy="${y(v)}" r="5"/></g>`;
   });
   semanas.forEach((s, i) => {
-    g += `<rect class="alvo" data-i="${i}" tabindex="0" x="${m.l + banda * i}" y="${m.t}" width="${banda}" height="${h}" aria-label="${esc(t().ateSemanaDeAria(dm(s.segunda), S(acum[i] * HORA)))}"/>`;
+    g += `<rect class="alvo" data-i="${i}" tabindex="0" x="${m.l + banda * i}" y="${m.t}" width="${banda}" height="${h}" aria-label="${esc(U.ateAria(U.rotSaldo(s), S(acum[i] * HORA)))}"/>`;
   });
-  const area = montarFigura("gSaldo", `${svgAbre(L, A, t().grafSaldoAria)}${g}</svg>`, {
-    cab: [t().colAteSemanaDe, t().colSaldoSemana, t().colAcumulado],
-    linhas: semanas.map((s, i) => [dm(s.segunda), S(s.saldo), S(acum[i] * HORA)]),
-  });
+  const area = montarFigura("gSaldo", `${svgAbre(L, A, U.grafSaldo)}${g}</svg>`, tabela);
   ligarDicas(area, i => ({
-    titulo: t().ateSemanaDe(dm(semanas[i].segunda)),
-    linhas: [[S(acum[i] * HORA), t().acumulado, ""], [S(semanas[i].saldo), t().naSemana, "nada"]],
+    titulo: U.ate(U.rotSaldo(semanas[i])),
+    linhas: [[S(acum[i] * HORA), t().acumulado, ""], [S(semanas[i].saldo), U.naUnidade, "nada"]],
   }));
 }
 
