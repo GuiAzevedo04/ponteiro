@@ -614,9 +614,20 @@ export function semanasAte(fim, n, registro, metaPadrao) {
   const ultima = inicioDaSemana(fim);
   const amanha = chaveDia(somaDias(fim, 1));
   return Array.from({ length: n }, (_, i) => {
-    const segunda = somaDias(ultima, -7 * (n - 1 - i));
-    return { segunda, ...semana(segunda, registro, metaPadrao, amanha) };
+    const data = somaDias(ultima, -7 * (n - 1 - i));
+    return { data, ...semana(data, registro, metaPadrao, amanha) };
   });
+}
+
+// Os dias de `de` até `fim` (datas) que entram no saldo, mais antigo primeiro
+export function diasAte(de, fim, registro, metaPadrao) {
+  const ate = chaveDia(fim);
+  const dias = [];
+  for (let d = de; chaveDia(d) <= ate; d = somaDias(d, 1)) {
+    const c = noSaldo(registro[chaveDia(d)], metaPadrao);
+    if (c) dias.push({ data: d, ...c, saldo: c.ms - c.meta });
+  }
+  return dias;
 }
 
 // Dias de trabalho fechados entre `de` e `ate` (chaves, inclusive)
