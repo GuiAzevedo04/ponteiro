@@ -23,9 +23,9 @@ conta, sem nuvem e sem anúncio.
 - **Histórico.** Todos os dias, editáveis, cada um marcado como trabalho,
   folga, férias, atestado ou feriado. Exporta o mês para CSV, só para ler: o
   backup completo é o arquivo de Ajustes.
-- **Estatísticas.** Horas por semana contra a meta, saldo acumulado e o
-  expediente dia a dia, em 4, 12 ou 26 semanas ou tudo. Cada gráfico tem uma
-  versão em tabela.
+- **Estatísticas.** Horas contra a meta e saldo acumulado, por semana ou por
+  dia, e o expediente dia a dia, em 4, 12 ou 26 semanas ou tudo. Cada gráfico
+  tem uma versão em tabela.
 - **Feriados prontos.** Já conhece os feriados nacionais do Brasil, inclusive
   Carnaval, Sexta-feira Santa e Corpus Christi. Os da sua cidade e os recessos
   você acrescenta em Ajustes.
